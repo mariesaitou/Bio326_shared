@@ -1,0 +1,450 @@
+---
+title: "Bio326_2024"
+author: "Marie Saitou"
+date: "2024-01-29"
+output: html_document
+---
+
+
+## Overview of the tutorial
+Last time, you started sequencing of cattle genome using Nanopore MinION. 
+For the following three sessions we will learn:
+
+ - How to use Orion and conduct genome analysis
+ 
+ - Quality check, Read filtering, mapping to the reference genome and variant calling
+
+ - How to interpret summary statistics of Nanopore sequence data
+
+ - How to interpret variant data
+
+In this tutorial, we will investigate a small subset of pig genome sequence. 
+
+You will have an access to the whole datasets later for your reports as soon as the computation is done.
+
+Also, we prepared some questions in each section. 
+
+Please discuss and try the quizzes to deepen your understanding on the Nanopore data.
+
+
+[Review the previous practice](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md)
+
+[Prepare your tools on Orion](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
+
+
+
+# Section 1
+
+Overview.
+
+(1) Quality check -> Trimming of low quality reads -> Quality check
+
+(2) (optional) Compare the overall reads quality between replicates and conditions
+
+
+
+## Connect to Orion and the preparation
+
+Go to https://orion.nmbu.no/ at NMBU or with VPN.
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2022/prep1.png){width=80%}
+
+
+In the Terminal/Command prompt, go to your directory.
+[Review: the concept of current directry](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md#temporary-working-directory-faster-and-more-efficient-jobs)
+
+```{bash,eval=FALSE}
+cd your_directory
+```
+
+
+Let's make a directory for analysis and enter in it.
+
+```{bash,eval=FALSE}
+mkdir pig_analysis # make directory "pig_analysis"
+cd pig_analysis # set the current directory "pig_analysis"
+
+```
+
+Now, you will inspect the fastq file from your experiment, which contains Nanopore read information.
+
+## Check the read quality by Nanoplot
+###  Browse the inside of the read (fastq) file
+
+[Review: look into a file content in a command line](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md#conda-envrionment)
+
+**for teachers: please_update_the_file_location_**
+**one file per one student**
+```{bash,eval=FALSE}
+zcat pigdata_fastq.gz | more
+
+```
+
+How a fastq file looks.
+
+
+Each entry in a FASTQ files consists of 4 lines:
+
+1. A sequence identifier with information about the sequencing run. (run time, run ID, cflow cell id ... )
+
+2.The sequence (the base calls; A, C, T, G and N).
+
+3. A separator, which is simply a plus (+) sign.
+
+4. The base call quality scores. These are Phred +33 encoded, using ASCII characters to represent the numerical quality scores." [quality score sheet](https://learn.gencore.bio.nyu.edu/ngs-file-formats/quality-scores/)
+
+- by [Illumina Knowledge](https://knowledge.illumina.com/software/general/software-general-reference_material-list/000002211)
+
+
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image1.png){width=80%}
+
+
+###  Get basic stats of the fastq file
+
+"zcat"-> look inside
+
+"wc" -> word count
+
+"-l" -> line
+
+```{bash,eval=FALSE}
+zcat /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_demodata_fastq.gz | wc -l
+```
+
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image2.png){width=80%}
+
+## **Discussion Point**
+## **For teachers: please make some more discussion points like this**
+
+Now you got the number of lines in the fastq file.
+
+How many sequence reads are in the fastq file?
+
+<details>
+  <summary> **Need Help?** </summary>      
+
+We see that there are 96000 lines in the fastq file. 
+
+As we learned that "each entry in a FASTQ files consists of 4 lines", one read is corresponding to four lines. So in this file we have 96000/4 = 24000 reads.
+
+</details> 
+
+
+
+###  Run Nanoplot
+
+The original fastq files may contain low quality reads. In this step, we will use "Nanoplot" to see the quality and lentgh of each read.
+
+"Singularity" is a toolset on Orion to execute software. A variety of different bioinformatics tools are available in Singularity.
+
+Make a slurm script like below and run it. 
+
+[Review: make a slurm script](to be updated)
+
+[Review: run a slurm script by sbatch sbatch](https://orion.nmbu.no/en/SLURM)
+
+
+
+
+```{bash,eval=FALSE}
+
+
+#!/bin/bash
+#SBATCH --job-name=Nanoplot  # sensible name for the job
+#SBATCH --mail-user=yourname@nmbu.no # Email me when job is done.
+#SBATCH --mem=12G 
+#SBATCH --ntasks=1   
+#SBATCH --cpus-per-task=8
+#SBATCH --mail-type=END
+
+
+singularity exec /cvmfs/singularity.galaxyproject.org/all/nanoplot:1.41.0--pyhdfd78af_0 NanoPlot -t 8  --fastq /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_demodata_fastq.gz --plots dot   --no_supplementary --no_static --N50 -p before
+
+```
+
+
+Nanoplot will generate the result files, named "before"xxx. Lets look into them... 
+
+[Review: File transfer between Orion and your computer](https://orion.nmbu.no/en/connectingtoorion)
+
+## **For teachers: please make ready-made result files and specify the location**
+
+```{bash,eval=FALSE}
+
+# taking too long?
+qlogin 
+
+cp /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/beforeNanoPlot-report.html beforeNanoPlot-report.html
+
+```
+
+Open "beforeNanoPlot-report.html" on your local computer
+
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image3.png){width=80%}
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image4.png){width=80%}
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image5.png){width=80%}
+
+
+
+Everything you need in case scripts do not work well
+**for teachers: please specify the location**
+```{bash,eval=FALSE}
+ls /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data
+
+# use cp command to copy files
+
+# or run the full slurm script
+sbatch /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/Bio326_2023_full.slurm
+```
+
+
+
+
+
+- Filter low quality reads and short reads
+ 
+- Map the reads to the reference genome 
+
+- Detect variants
+
+
+
+![](assets/BIO326-genome/Slide14.png){width=80%}
+
+**for teachers: please replace singularity to conda**
+
+## Filtering by Nanofilt
+```{bash,eval=FALSE}
+
+#!/bin/bash
+#SBATCH --job-name=Nanoplot  # sensible name for the job
+#SBATCH --mail-user=yourname@nmbu.no # Email me when job is done.
+#SBATCH --mem=12G 
+#SBATCH --ntasks=1   
+#SBATCH --mail-type=END
+
+gunzip -c /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_demodata_fastq.gz | singularity exec  /cvmfs/singularity.galaxyproject.org/all/nanofilt:2.8.0--py_0 NanoFilt -q 10 -l 500 | gzip > cleaned.pig.fastq.gz
+
+```
+
+
+-l,  Filter on a minimum read length
+
+-q, Filter on a minimum average read quality score
+
+In this case, we are removing reads lower than quality score 10 and shorter than 500 bases.
+  
+
+
+## Compare the before and after cleaning sequences 
+
+Run Nanoplot again on the cleaned sequences.
+
+
+<details>
+  <summary> **Need help?** </summary>      
+  
+```{bash,eval=FALSE}
+
+#!/bin/bash
+#SBATCH --job-name=Nanoplot  # sensible name for the job
+#SBATCH --mail-user=yourname@nmbu.no # Email me when job is done.
+#SBATCH --mem=12G 
+#SBATCH --ntasks=1   
+#SBATCH --cpus-per-task=8
+#SBATCH --mail-type=END
+
+singularity exec /cvmfs/singularity.galaxyproject.org/all/nanoplot:1.41.0--pyhdfd78af_0 NanoPlot -t 8  --fastq cleaned.pig.fastq.gz  --N50  --no_supplementary --no_static  --plots dot   -p after
+
+
+```
+
+</details> 
+
+Open "afterNanoPlot-report.html" on your local computer.
+
+```{bash,eval=FALSE}
+
+# taking too long?
+qlogin 
+
+cp /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/afterNanoPlot-report.html afterNanoPlot-report.html
+
+```
+
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image6.png){width=80%}
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image7.png){width=80%}
+
+
+
+## **Discussion Point**
+
+Did you see the difference of read and quality distribution between before and after the filtering?
+
+## Optional:
+You can compare the read quality between replicates and between conditions.
+
+**for teachers: please make the quality check results file for all experiments in a shared directory and specify the location**
+
+
+In case Singularity does not work ... use [conda](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
+
+
+## Mapping to the reference genome
+
+## run Minimap and map the reads to the reference genome
+
+**for teachers: please replace the bull ref. genome (ver.2023) to pig genome**
+**for teachers: please make four input fastq files, merging multiple fastq files under the same conditions, Vortex, Needle, Freeze and Crtl,  cleaned.pig.fastq.gz should be replaced to the four files**
+
+```{bash,eval=FALSE}
+
+
+#!/bin/bash
+#SBATCH --job-name=Nanoplot  # sensible name for the job
+#SBATCH --mail-user=yourname@nmbu.no # Email me when job is done.
+#SBATCH --mem=12G 
+#SBATCH --ntasks=1   
+#SBATCH --cpus-per-task=8
+#SBATCH --mail-type=END
+
+singularity exec /cvmfs/singularity.galaxyproject.org/all/minimap2:2.24--h7132678_1 minimap2 -t 8 -a -a /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/Bos_taurus.fa.gz  cleaned.pig.fastq.gz > pig.sam
+# updated (the reference Bos taurus fasta location)
+
+
+# convert the sam file to bam format
+singularity exec  /cvmfs/singularity.galaxyproject.org/all/samtools:1.16.1--h6899075_1 samtools view -S -b pig.sam > pig0.bam
+
+## sort the bam file
+singularity exec  /cvmfs/singularity.galaxyproject.org/all/samtools:1.16.1--h6899075_1 samtools sort pig0.bam -o pig.bam
+
+# index the bam file
+singularity exec  /cvmfs/singularity.galaxyproject.org/all/samtools:1.16.1--h6899075_1 samtools index -M  pig.bam
+
+
+# Variant Calling using Sniffles
+singularity exec /cvmfs/singularity.galaxyproject.org/all/sniffles:2.0.7--pyhdfd78af_0 sniffles --input  pig.bam --vcf pig.vcf
+
+
+```
+
+**for teachers: add the step to merge the four vcf files into one**
+
+
+```{bash,eval=FALSE}
+
+# taking too long?
+qlogin 
+ls /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/
+
+# and copy the file you need (the final product is .vcf file)
+```
+
+
+
+
+Now you got the variant file!
+
+# Session 3, investigate the variants
+
+
+[resulting vcf file](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/pig.vcf)
+
+
+- Celian will explain how to read a vcf file.
+
+```{bash,eval=FALSE}
+# INFO field
+
+grep '^##' pig.vcf | tail -n 20
+
+# variants
+grep -v '^##' pig.vcf | more
+
+
+```
+
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image11.png){width=80%}
+
+Important parameters
+
+
+1	16849578 : location of the variant 
+
+SVTYPE=DEL;SVLEN=-60 : size and type of the variant
+
+0/1 : genotype 
+
+(you can open a vcf file in notepad, excel etc.)
+
+
+
+
+Now you have variants! Lets see what genes are affected by the variants.
+
+
+## Estimate the effect of variants
+
+
+[Go to VEP (Variant Effect Predictor)](https://www.ensembl.org/Tools/VEP)
+
+
+Variant Effect predictor tells us where in the genome the discovered variants are located (genic, regulartory, etc...)
+
+Select "cow" as the reference species.
+
+
+
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image14.png){width=80%}
+
+Upload: pig.vcf - downloaded from Orion or the section above as the file to investigate.
+
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image15.png){width=80%}
+
+There are 428 variants; 88 genes are affected by these varaints.
+
+
+What are the most affected genes?
+
+Click "Filters" and set "Impact is HIGH" to select highly impact variants. 
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image16.png){width=80%}
+
+There are some frameshift/transcript ablation variants.
+
+Let's closely investigate "25:7668-11178	deletion	  transcript_ablation	5S_rRNA".
+
+
+
+[Go to IGV (Integrative Genomics Viewer)](https://igv.org/app/)
+**this should be replaced to pig** 
+Select "Genome": Pig (susScr11)
+
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image12.png){width=40%}
+
+Select "Tracks": pig.vcf - downloaded from Orion or the section above.
+
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image13.png){width=40%}
+
+Add "Ensembl Genes" to the "Track" and specify the region around chr25:7668-11178. 
+
+
+Did you find the large deletion that is covering the gene? How long is the deletion?
+
+
+![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image17.png){width=80%}
+
+
+
+

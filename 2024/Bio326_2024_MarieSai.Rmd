@@ -1,6 +1,6 @@
 ---
 title: "Bio326_2024"
-author: "Marie Saitou"
+author: "MS and colleagues"
 date: "2024-01-29"
 output: html_document
 ---
@@ -46,7 +46,9 @@ Overview.
 ## Connect to Orion and the preparation
 
 Go to https://orion.nmbu.no/ at NMBU or with VPN.
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2022/prep1.png){width=80%}
+
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2022/prep1.png){width=80%}
+
 
 
 In the Terminal/Command prompt, go to your directory.
@@ -96,7 +98,7 @@ Each entry in a FASTQ files consists of 4 lines:
 
 
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image1.png){width=80%}
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image1.png){width=80%}
 
 
 ###  Get basic stats of the fastq file
@@ -112,7 +114,8 @@ zcat /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_de
 ```
 
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image2.png){width=80%}
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image2.png){width=80%}
+
 
 ## **Discussion Point**
 ## **For teachers: please make some more discussion points like this**
@@ -184,11 +187,11 @@ cp /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/beforeNa
 Open "beforeNanoPlot-report.html" on your local computer
 
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image3.png){width=80%}
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image3.png){width=80%}
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image4.png){width=80%}
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image4.png){width=80%}
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image5.png){width=80%}
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image5.png){width=80%}
 
 
 
@@ -214,8 +217,8 @@ sbatch /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/Bio3
 - Detect variants
 
 
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/BIO326-genome/Slide14.png){width=80%}
 
-![](assets/BIO326-genome/Slide14.png){width=80%}
 
 **for teachers: please replace singularity to conda**
 
@@ -279,9 +282,11 @@ cp /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/afterNan
 ```
 
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image6.png){width=80%}
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image6.png){width=80%}
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image7.png){width=80%}
+
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image7.png){width=80%}
+
 
 
 
@@ -356,7 +361,7 @@ Now you got the variant file!
 # Session 3, investigate the variants
 
 
-[resulting vcf file](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/pig.vcf)
+[resulting vcf file](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/pig.vcf)
 
 
 - Celian will explain how to read a vcf file
@@ -374,7 +379,7 @@ grep -v '^##' pig.vcf | more
 ```
 
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image11.png){width=80%}
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image11.png){width=80%}
 
 Important parameters
 
@@ -424,12 +429,12 @@ Select "cow" as the reference species.
 
 
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image14.png){width=80%}
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image14.png){width=80%}
 
 Upload: pig.vcf - downloaded from Orion or the section above as the file to investigate.
 
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image15.png){width=80%}
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image15.png){width=80%}
 
 There are 428 variants; 88 genes are affected by these varaints.
 
@@ -438,7 +443,7 @@ What are the most affected genes?
 
 Click "Filters" and set "Impact is HIGH" to select highly impact variants. 
 
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image16.png){width=80%}
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image16.png){width=80%}
 
 There are some frameshift/transcript ablation variants.
 
@@ -448,4 +453,4 @@ Let's closely investigate your variant !
 Find your variant by downloading the .txt file
 
 
-![](https://github.com/mariesaitou/Bio326_shared/tree/main/2024/images/image_19.png){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_19.png){width=80%}

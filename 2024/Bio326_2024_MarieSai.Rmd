@@ -121,6 +121,8 @@ Now you got the number of lines in the fastq file.
 
 How many sequence reads are in the fastq file?
 
+What is the quality of the first 5bp ? what is the quality of bp between XX and YY ? Why do you think they are different ?
+
 <details>
   <summary> **Need Help?** </summary>      
 
@@ -357,7 +359,8 @@ Now you got the variant file!
 [resulting vcf file](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/pig.vcf)
 
 
-- Celian will explain how to read a vcf file.
+- Celian will explain how to read a vcf file
+Go to mentimeter (note to self : put link here)
 
 ```{bash,eval=FALSE}
 # INFO field
@@ -386,8 +389,26 @@ SVTYPE=DEL;SVLEN=-60 : size and type of the variant
 
 
 
-
 Now you have variants! Lets see what genes are affected by the variants.
+
+First we will select a random variant to investigate
+
+
+```{bash,eval=FALSE}
+#Check the number of variant in the file
+
+NBVAR=$(bcftools index -n pig.vcf)
+
+## sample a random number
+
+RANDOMVAR=$(echo $((RANDOM % $NBVAR + 1)))
+
+## let's check the variant sampled
+
+bcftools view -H pig.vcf | sed -n ${RANDOMVAR}p
+
+```
+
 
 
 ## Estimate the effect of variants
@@ -421,30 +442,10 @@ Click "Filters" and set "Impact is HIGH" to select highly impact variants.
 
 There are some frameshift/transcript ablation variants.
 
-Let's closely investigate "25:7668-11178	deletion	  transcript_ablation	5S_rRNA".
+
+Let's closely investigate your variant !
+
+Find your variant by downloading the .txt file
 
 
-
-[Go to IGV (Integrative Genomics Viewer)](https://igv.org/app/)
-**this should be replaced to pig** 
-Select "Genome": Pig (susScr11)
-
-
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image12.png){width=40%}
-
-Select "Tracks": pig.vcf - downloaded from Orion or the section above.
-
-
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image13.png){width=40%}
-
-Add "Ensembl Genes" to the "Track" and specify the region around chr25:7668-11178. 
-
-
-Did you find the large deletion that is covering the gene? How long is the deletion?
-
-
-![](https://github.com/mariesaitou/Bio326/tree/master/docs/assets/Bio326-2023/image17.png){width=80%}
-
-
-
-
+![](https://github.com/mariesaitou/Bio326_shared/tree/main/2024/images/image_19.png){width=80%}

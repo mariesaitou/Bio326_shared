@@ -2,12 +2,20 @@
 title: "Bio326_2024"
 author: "MS and colleagues"
 date: "2024-01-29"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
 ---
 
 
-## Overview of the tutorial
-Last time, you started sequencing of cattle genome using Nanopore MinION. 
+# Overview of the tutorial
+
+Last time, you conducted the Nanopore sequencing.
 For the following three sessions we will learn:
 
  - How to use Orion and conduct genome analysis
@@ -18,13 +26,11 @@ For the following three sessions we will learn:
 
  - How to interpret variant data
 
-In this tutorial, we will investigate a small subset of pig genome sequence. 
 
-You will have an access to the whole datasets later for your reports as soon as the computation is done.
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_overview.png)
 
-Also, we prepared some questions in each section. 
 
-Please discuss and try the quizzes to deepen your understanding on the Nanopore data.
+
 
 
 [Review the previous practice](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md)
@@ -33,17 +39,14 @@ Please discuss and try the quizzes to deepen your understanding on the Nanopore 
 
 
 
-# Section 1
-
-Overview.
+# Reads quality check
 
 (1) Quality check -> Trimming of low quality reads -> Quality check
 
-(2) (optional) Compare the overall reads quality between replicates and conditions
+(2) Compare the overall reads quality between four conditions 
 
 
-
-## Connect to Orion and the preparation
+## Connect to Orion and the prepare the tools
 
 Go to https://orion.nmbu.no/ at NMBU or with VPN.
 
@@ -72,10 +75,10 @@ Now, you will inspect the fastq file from your experiment, which contains Nanopo
 ## Check the read quality by Nanoplot
 ###  Browse the inside of the read (fastq) file
 
-[Review: look into a file content in a command line](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md#conda-envrionment)
+[Review: look into a file content in a command line](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
 
 **for teachers: please_update_the_file_location_**
-**one file per one student**
+
 ```{bash,eval=FALSE}
 zcat pigdata_fastq.gz | more
 
@@ -117,8 +120,7 @@ zcat /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_de
 ![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image2.png){width=80%}
 
 
-## **Discussion Point**
-## **For teachers: please make some more discussion points like this**
+## Discussion Point
 
 Now you got the number of lines in the fastq file.
 
@@ -137,7 +139,7 @@ As we learned that "each entry in a FASTQ files consists of 4 lines", one read i
 
 
 
-###  Run Nanoplot
+## Quality check by Nanoplot
 
 The original fastq files may contain low quality reads. In this step, we will use "Nanoplot" to see the quality and lentgh of each read.
 
@@ -163,8 +165,17 @@ Make a slurm script like below and run it.
 #SBATCH --cpus-per-task=8
 #SBATCH --mail-type=END
 
+##Activate conda environment
+module load Miniconda3 && eval "$(conda shell.bash hook)"
 
-singularity exec /cvmfs/singularity.galaxyproject.org/all/nanoplot:1.41.0--pyhdfd78af_0 NanoPlot -t 8  --fastq /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_demodata_fastq.gz --plots dot   --no_supplementary --no_static --N50 -p before
+### NB! Remember to use your own conda environment:
+
+conda activate $SCRATCH/ToolBox/EUKVariantDetection 
+##Activating conda environments
+conda activate $COURSES/BIO326/BestPracticesOrion/BLASTConda
+echo "Working with this $CONDA_PREFIX environmet ..."
+
+NanoPlot -t 8  --fastq /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_demodata_fastq.gz --plots dot   --no_supplementary --no_static --N50 -p before
 
 ```
 
@@ -208,8 +219,6 @@ sbatch /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/Bio3
 
 
 
-
-
 - Filter low quality reads and short reads
  
 - Map the reads to the reference genome 
@@ -245,7 +254,7 @@ In this case, we are removing reads lower than quality score 10 and shorter than
   
 
 
-## Compare the before and after cleaning sequences 
+## Compare thesequences before and after cleaning
 
 Run Nanoplot again on the cleaned sequences.
 
@@ -294,8 +303,6 @@ cp /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/afterNan
 
 Did you see the difference of read and quality distribution between before and after the filtering?
 
-## Optional:
-You can compare the read quality between replicates and between conditions.
 
 **for teachers: please make the quality check results file for all experiments in a shared directory and specify the location**
 
@@ -303,7 +310,7 @@ You can compare the read quality between replicates and between conditions.
 In case Singularity does not work ... use [conda](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
 
 
-## Mapping to the reference genome
+# Mapping to the reference genome
 
 ## run Minimap and map the reads to the reference genome
 
@@ -341,7 +348,6 @@ singularity exec /cvmfs/singularity.galaxyproject.org/all/sniffles:2.0.7--pyhdfd
 
 ```
 
-**for teachers: add the step to merge the four vcf files into one**
 
 
 ```{bash,eval=FALSE}
@@ -358,7 +364,7 @@ ls /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/
 
 Now you got the variant file!
 
-# Session 3, investigate the variants
+# **Investigate the variants**
 
 
 [resulting vcf file](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/pig.vcf)

@@ -15,32 +15,44 @@ output:
 
 # Overview of the tutorial
 
-Last time, you conducted the Nanopore sequencing.
-For the following three sessions we will learn:
+Using the data from the Nanopore sequencing you conducted,
+
+Now the following sessions, we aim to:
+
+- Compare the read length and quality between the experimental conditions
+
+- Investigate how the read cleaning process affect the read yields
+
+- Identify the genomic variants from the sequence data
+
+- Interpret how the genomic variants affects the animal biologically
+
+
+And we will learn:
 
  - How to use Orion and conduct genome analysis
  
- - Quality check, Read filtering, mapping to the reference genome and variant calling
+ - Quality check, read filtering, mapping to the reference genome and variant calling
 
  - How to interpret summary statistics of Nanopore sequence data
 
- - How to interpret variant data
+ - How to interpret genetic variants
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_overview.png)
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_overview.png){width=80%}
 
 
 
 
+[Using Orion](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md)
 
-[Review the previous practice](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md)
-
-[Prepare your tools on Orion](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
+[Prepare your computational tools with Conda](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
 
 
 
 # Reads quality check
 
+Overview:
 (1) Quality check -> Trimming of low quality reads -> Quality check
 
 (2) Compare the overall reads quality between four conditions 
@@ -65,8 +77,8 @@ cd your_directory
 Let's make a directory for analysis and enter in it.
 
 ```{bash,eval=FALSE}
-mkdir pig_analysis # make directory "pig_analysis"
-cd pig_analysis # set the current directory "pig_analysis"
+mkdir analysis # make directory "analysis"
+cd analysis # set the current directory "analysis"
 
 ```
 
@@ -77,15 +89,15 @@ Now, you will inspect the fastq file from your experiment, which contains Nanopo
 
 [Review: look into a file content in a command line](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
 
-**for teachers: please_update_the_file_location_**
+
+Let's learn how a fastq file (sequencing reads) looks using a sample file.
 
 ```{bash,eval=FALSE}
-zcat pigdata_fastq.gz | more
-
+zcat /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_demodata_fastq.gz | more
 ```
 
-How a fastq file looks.
 
+Now you are seeing the content of a fastq file. (.gz = compressed)
 
 Each entry in a FASTQ files consists of 4 lines:
 
@@ -120,7 +132,7 @@ zcat /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_de
 ![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image2.png){width=80%}
 
 
-## Discussion Point
+### **Discussion Point**
 
 Now you got the number of lines in the fastq file.
 
@@ -143,9 +155,7 @@ As we learned that "each entry in a FASTQ files consists of 4 lines", one read i
 
 The original fastq files may contain low quality reads. In this step, we will use "Nanoplot" to see the quality and lentgh of each read.
 
-"Singularity" is a toolset on Orion to execute software. A variety of different bioinformatics tools are available in Singularity.
-
-Make a slurm script like below and run it. 
+Make a slurm script to conduct the quality check on the sample file like below and run it. 
 
 [Review: make a slurm script](to be updated)
 
@@ -153,9 +163,7 @@ Make a slurm script like below and run it.
 
 
 
-
 ```{bash,eval=FALSE}
-
 
 #!/bin/bash
 #SBATCH --job-name=Nanoplot  # sensible name for the job
@@ -184,7 +192,6 @@ Nanoplot will generate the result files, named "before"xxx. Lets look into them.
 
 [Review: File transfer between Orion and your computer](https://orion.nmbu.no/en/connectingtoorion)
 
-## **For teachers: please make ready-made result files and specify the location**
 
 ```{bash,eval=FALSE}
 
@@ -206,32 +213,9 @@ Open "beforeNanoPlot-report.html" on your local computer
 
 
 
-Everything you need in case scripts do not work well
-**for teachers: please specify the location**
-```{bash,eval=FALSE}
-ls /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data
-
-# use cp command to copy files
-
-# or run the full slurm script
-sbatch /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/Bio326_2023_full.slurm
-```
 
 
-
-- Filter low quality reads and short reads
- 
-- Map the reads to the reference genome 
-
-- Detect variants
-
-
-![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/BIO326-genome/Slide14.png){width=80%}
-
-
-**for teachers: please replace singularity to conda**
-
-## Filtering by Nanofilt
+##Filtering by Nanofilt
 ```{bash,eval=FALSE}
 
 #!/bin/bash
@@ -241,7 +225,18 @@ sbatch /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/Bio3
 #SBATCH --ntasks=1   
 #SBATCH --mail-type=END
 
-gunzip -c /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_demodata_fastq.gz | singularity exec  /cvmfs/singularity.galaxyproject.org/all/nanofilt:2.8.0--py_0 NanoFilt -q 10 -l 500 | gzip > cleaned.pig.fastq.gz
+##Activate conda environment
+module load Miniconda3 && eval "$(conda shell.bash hook)"
+
+### NB! Remember to use your own conda environment:
+
+conda activate $SCRATCH/ToolBox/EUKVariantDetection 
+##Activating conda environments
+conda activate $COURSES/BIO326/BestPracticesOrion/BLASTConda
+echo "Working with this $CONDA_PREFIX environmet ..."
+
+
+gunzip -c /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/pig_demodata_fastq.gz | NanoFilt -q 10 -l 500 | gzip > cleaned.pig.fastq.gz
 
 ```
 
@@ -251,10 +246,12 @@ gunzip -c /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/p
 -q, Filter on a minimum average read quality score
 
 In this case, we are removing reads lower than quality score 10 and shorter than 500 bases.
-  
 
+If you are ambitious, please adjust the filtering parameters and see how they change the result.
 
-## Compare thesequences before and after cleaning
+(In that case, do not forget to name the result files differently.)
+
+## Compare the sequences before and after cleaning
 
 Run Nanoplot again on the cleaned sequences.
 
@@ -272,7 +269,18 @@ Run Nanoplot again on the cleaned sequences.
 #SBATCH --cpus-per-task=8
 #SBATCH --mail-type=END
 
-singularity exec /cvmfs/singularity.galaxyproject.org/all/nanoplot:1.41.0--pyhdfd78af_0 NanoPlot -t 8  --fastq cleaned.pig.fastq.gz  --N50  --no_supplementary --no_static  --plots dot   -p after
+##Activate conda environment
+module load Miniconda3 && eval "$(conda shell.bash hook)"
+
+### NB! Remember to use your own conda environment:
+
+conda activate $SCRATCH/ToolBox/EUKVariantDetection 
+##Activating conda environments
+conda activate $COURSES/BIO326/BestPracticesOrion/BLASTConda
+echo "Working with this $CONDA_PREFIX environmet ..."
+
+
+NanoPlot -t 8  --fastq cleaned.pig.fastq.gz  --N50  --no_supplementary --no_static  --plots dot   -p after
 
 
 ```
@@ -299,27 +307,37 @@ cp /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/afterNan
 
 
 
-## **Discussion Point**
+### **Discussion Point**
 
 Did you see the difference of read and quality distribution between before and after the filtering?
 
+## **Your mission**
 
-**for teachers: please make the quality check results file for all experiments in a shared directory and specify the location**
+Do the quality check and filtering, and compare the read length and quality between the four experimental conditions.
 
 
-In case Singularity does not work ... use [conda](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
+**for teachers: please make four input fastq files, merging multiple fastq files under the four conditions**
+
+**For teachers: please make ready-made result files and specify the location**
+Everything you need in case scripts do not work well...
+(script and result files)
+
+
 
 
 # Mapping to the reference genome
 
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/BIO326-genome/Slide14.png){width=90%}
+
+
+
 ## run Minimap and map the reads to the reference genome
 
-**for teachers: please replace the bull ref. genome (ver.2023) to pig genome**
-**for teachers: please make four input fastq files, merging multiple fastq files under the same conditions, Vortex, Needle, Freeze and Crtl,  cleaned.pig.fastq.gz should be replaced to the four files**
+**for teachers: please download the pig genome to the course directory and edit in the following script**
+[pig genome](https://ftp.ensembl.org/pub/release-111/fasta/sus_scrofa/dna/Sus_scrofa.Sscrofa11.1.dna_sm.toplevel.fa.gz)
+
 
 ```{bash,eval=FALSE}
-
-
 #!/bin/bash
 #SBATCH --job-name=Nanoplot  # sensible name for the job
 #SBATCH --mail-user=yourname@nmbu.no # Email me when job is done.
@@ -328,8 +346,18 @@ In case Singularity does not work ... use [conda](https://github.com/TheMEMOLab/
 #SBATCH --cpus-per-task=8
 #SBATCH --mail-type=END
 
-singularity exec /cvmfs/singularity.galaxyproject.org/all/minimap2:2.24--h7132678_1 minimap2 -t 8 -a -a /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/Bos_taurus.fa.gz  cleaned.pig.fastq.gz > pig.sam
-# updated (the reference Bos taurus fasta location)
+##Activate conda environment
+module load Miniconda3 && eval "$(conda shell.bash hook)"
+
+### NB! Remember to use your own conda environment:
+
+conda activate $SCRATCH/ToolBox/EUKVariantDetection 
+##Activating conda environments
+conda activate $COURSES/BIO326/BestPracticesOrion/BLASTConda
+echo "Working with this $CONDA_PREFIX environmet ..."
+
+
+minimap2 -t 8 -a -a ref.fa.gz  cleaned.control.fastq.gz > pig.sam
 
 
 # convert the sam file to bam format
@@ -350,24 +378,13 @@ singularity exec /cvmfs/singularity.galaxyproject.org/all/sniffles:2.0.7--pyhdfd
 
 
 
-```{bash,eval=FALSE}
-
-# taking too long?
-qlogin 
-ls /net/fs-2/scale/OrionStore/Courses/BIO326/EUK/pig_analysis/demo_data/
-
-# and copy the file you need (the final product is .vcf file)
-```
-
+**for teachers - please make a ready-made vcf file just in case**
 
 
 
 Now you got the variant file!
 
-# **Investigate the variants**
-
-
-[resulting vcf file](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/pig.vcf)
+# Investigate the variants
 
 
 - Celian will explain how to read a vcf file
@@ -428,14 +445,13 @@ bcftools view -H pig.vcf | sed -n ${RANDOMVAR}p
 [Go to VEP (Variant Effect Predictor)](https://www.ensembl.org/Tools/VEP)
 
 
-Variant Effect predictor tells us where in the genome the discovered variants are located (genic, regulartory, etc...)
+Variant Effect predictor tells us where in the genome the discovered variants are located (genic, regulatory, etc...)
 
-Select "cow" as the reference species.
-
-
+Select "pig" as the reference species.
 
 
-![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image14.png){width=80%}
+
+
 
 Upload: pig.vcf - downloaded from Orion or the section above as the file to investigate.
 
@@ -460,3 +476,11 @@ Find your variant by downloading the .txt file
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_19.png){width=80%}
+
+
+
+
+
+
+
+

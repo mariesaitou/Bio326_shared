@@ -113,7 +113,7 @@ Each entry in a FASTQ files consists of 4 lines:
 
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image1.png){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image1.PNG){width=80%}
 
 
 ###  Get basic stats of the fastq file
@@ -129,7 +129,7 @@ zcat /mnt/courses/BIO326/EUK/result_2024/pig_demo_fasta_BC01.fastq.gz | wc -l
 ```
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image2.png){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image2.PNG){width=80%}
 
 
 ### **Discussion Point**
@@ -212,11 +212,11 @@ cp /mnt/courses/BIO326/EUK/result_2024/before_BC01NanoPlot-report.html  before_B
 Open "before_BC01NanoPlot-report.html" on your local computer
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image3.png){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image3.PNG){width=80%}
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image4.png){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image4.PNG){width=80%}
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image5.png){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image5.PNG){width=80%}
 
 
 
@@ -347,21 +347,20 @@ conda activate /mnt/courses/BIO326/EUK/condaenvironments/condaEUK
 echo "Working with this $CONDA_PREFIX environment ..."
 
 
-minimap2 -t 8 -a -a /mnt/courses/BIO326/EUK/pig_genomeSus_scrofa.Sscrofa11.1.dna.toplevel.fa.gz  /mnt/courses/BIO326/EUK/result_2024/cleaned_pig_demodata_BCO1.fastq.gz > pig.sam
+minimap2 -t 8 -a -a /mnt/courses/BIO326/EUK/pig_genome/Sus_scrofa.Sscrofa11.1.dna.toplevel.fa.gz  /mnt/courses/BIO326/EUK/result_2024/cleaned_pig_demodata_BCO1.fastq.gz > pig.sam
 
 
 # convert the sam file to bam format
-singularity exec  /cvmfs/singularity.galaxyproject.org/all/samtools:1.16.1--h6899075_1 samtools view -S -b pig.sam > pig0.bam
+samtools view -S -b pig.sam > pig0.bam
 
 ## sort the bam file
-singularity exec  /cvmfs/singularity.galaxyproject.org/all/samtools:1.16.1--h6899075_1 samtools sort pig0.bam -o pig.bam
+samtools sort pig0.bam -o pig.bam
 
 # index the bam file
-singularity exec  /cvmfs/singularity.galaxyproject.org/all/samtools:1.16.1--h6899075_1 samtools index -M  pig.bam
-
+samtools index -M  pig.bam
 
 # Variant Calling using Sniffles
-singularity exec /cvmfs/singularity.galaxyproject.org/all/sniffles:2.0.7--pyhdfd78af_0 sniffles --input  pig.bam --vcf pig.vcf
+sniffles --input  pig.bam --vcf pig.vcf
 
 
 ```

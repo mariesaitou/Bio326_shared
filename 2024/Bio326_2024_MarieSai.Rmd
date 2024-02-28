@@ -36,7 +36,7 @@ And we will learn:
 
  - How to interpret summary statistics of Nanopore sequence data
 
- - How to interpret genetic variants
+ - How to identify and interpret genetic variants
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_overview.png){width=80%}
@@ -53,9 +53,10 @@ And we will learn:
 # Reads quality check
 
 Overview:
+
 (1) Quality check -> Trimming of low quality reads -> Quality check
 
-(2) Compare the overall reads quality between four conditions 
+(2) Compare the overall reads quality between conditions 
 
 
 ## Connect to Orion and the prepare the tools
@@ -67,6 +68,7 @@ Go to https://orion.nmbu.no/ at NMBU or with VPN.
 
 
 In the Terminal/Command prompt, go to your directory.
+
 [Review: the concept of current directry](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md#temporary-working-directory-faster-and-more-efficient-jobs)
 
 ```{bash,eval=FALSE}
@@ -93,7 +95,7 @@ Now, you will inspect the fastq file from your experiment, which contains Nanopo
 Let's learn how a fastq file (sequencing reads) looks using a sample file.
 
 ```{bash,eval=FALSE}
-zcat /mnt/courses/BIO326/EUK/result_2024/pig_demo_fasta_BC01.fastq.gz| more
+zcat /mnt/courses/BIO326/EUK/result_2024/pig_demo_fasta_BC01.fastq.gz | more
 ```
 
 
@@ -103,7 +105,7 @@ Each entry in a FASTQ files consists of 4 lines:
 
 1. A sequence identifier with information about the sequencing run. (run time, run ID, cflow cell id ... )
 
-2.The sequence (the base calls; A, C, T, G and N).
+2. The sequence (the base calls; A, C, T, G and N).
 
 3. A separator, which is simply a plus (+) sign.
 
@@ -138,12 +140,8 @@ Now you got the number of lines in the fastq file.
 
 How many sequence reads are in the fastq file?
 
-What is the quality of bp between 1 and 5 ? what is the quality of bp between 21 and 25 ? Why do you think they are different ?
+What is the quality of bp between 1 and 5? What is the quality of bp between 21 and 25? Why do you think they are different?
 
-Hint for the 5 first bp: 
-```{bash,eval=FALSE}
-zcat /mnt/courses/BIO326/EUK/result_2024/pig_demo_fasta_BC01.fastq.gz | sed -n 4p | cut -c 1-5
-```
 
 <details>
   <summary> **Need Help?** </summary>      
@@ -151,6 +149,12 @@ zcat /mnt/courses/BIO326/EUK/result_2024/pig_demo_fasta_BC01.fastq.gz | sed -n 4
 We see that there are 96000 lines in the fastq file. 
 
 As we learned that "each entry in a FASTQ files consists of 4 lines", one read is corresponding to four lines. So in this file we have 96000/4 = 24000 reads.
+
+Hint for the 5 first bp: 
+```{bash,eval=FALSE}
+zcat /mnt/courses/BIO326/EUK/result_2024/pig_demo_fasta_BC01.fastq.gz | sed -n 4p | cut -c 1-5
+```
+
 
 </details> 
 
@@ -365,9 +369,6 @@ sniffles --input  pig.bam --vcf pig.vcf
 
 ```
 
-
-
-**for teachers - please make a ready-made vcf file just in case**
 
 
 

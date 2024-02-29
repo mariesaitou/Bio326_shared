@@ -146,9 +146,9 @@ What is the quality of bp between 1 and 5? What is the quality of bp between 21 
 <details>
   <summary> **Need Help?** </summary>      
 
-We see that there are 96000 lines in the fastq file. 
+We see that there are 48000 lines in the fastq file. 
 
-As we learned that "each entry in a FASTQ files consists of 4 lines", one read is corresponding to four lines. So in this file we have 96000/4 = 24000 reads.
+As we learned that "each entry in a FASTQ files consists of 4 lines", one read is corresponding to four lines. So in this file we have 48000/4 = 12000 reads.
 
 Hint for the 5 first bp: 
 ```{bash,eval=FALSE}
@@ -166,9 +166,8 @@ The original fastq files may contain low quality reads. In this step, we will us
 
 Make a slurm script to conduct the quality check on the sample file like below and run it. 
 
-[Review: make a slurm script](to be updated)
 
-[Review: run a slurm script by sbatch sbatch](https://orion.nmbu.no/en/SLURM)
+[Review: make a slurm script and run it by sbatch](https://orion.nmbu.no/en/SLURM)
 
 
 
@@ -201,7 +200,7 @@ NanoPlot -t 8  --fastq /mnt/courses/BIO326/EUK/result_2024/pig_demo_fasta_BC01.f
 
 Nanoplot will generate the result files, named "before"xxx. Lets look into them... 
 
-[Review: File transfer between Orion and your computer](https://orion.nmbu.no/en/connectingtoorion)
+[Review: File transfer between Orion and your computer](https://orion.nmbu.no/en/Copydata)
 
 
 ```{bash,eval=FALSE}
@@ -331,8 +330,7 @@ Do the quality check and filtering, and compare the read length and quality betw
 
 ## run Minimap and map the reads to the reference genome
 
-**for teachers: please download the pig genome to the course directory and edit in the following script**
-[pig genome](https://ftp.ensembl.org/pub/release-111/fasta/sus_scrofa/dna/Sus_scrofa.Sscrofa11.1.dna_sm.toplevel.fa.gz)
+[cow genome](https://ftp.ensembl.org/pub/release-111/fasta/bos_taurus/dna/Bos_taurus.ARS-UCD1.3.dna.toplevel.fa.gz)
 
 
 ```{bash,eval=FALSE}
@@ -351,20 +349,20 @@ conda activate /mnt/courses/BIO326/EUK/condaenvironments/condaEUK
 echo "Working with this $CONDA_PREFIX environment ..."
 
 
-minimap2 -t 8 -a -a /mnt/courses/BIO326/EUK/pig_genome/Sus_scrofa.Sscrofa11.1.dna.toplevel.fa.gz  /mnt/courses/BIO326/EUK/result_2024/cleaned_pig_demodata_BCO1.fastq.gz > pig.sam
+minimap2 -t 8 -a -a /mnt/courses/BIO326/EUK/cow_genome/Bos_taurus.ARS-UCD1.3.dna.toplevel.fa.gz  /mnt/courses/BIO326/EUK/result_2024/cleaned_cow_demo_data.fastq.gz > cow.sam
 
 
 # convert the sam file to bam format
-samtools view -S -b pig.sam > pig0.bam
+samtools view -S -b cow.sam > cow0.bam
 
 ## sort the bam file
-samtools sort pig0.bam -o pig.bam
+samtools sort cow0.bam -o cow.bam
 
 # index the bam file
-samtools index -M  pig.bam
+samtools index -M  cow.bam
 
 # Variant Calling using Sniffles
-sniffles --input  pig.bam --vcf pig.vcf
+sniffles --input  cow.bam --vcf cow.vcf
 
 
 ```
@@ -378,15 +376,16 @@ Now you got the variant file!
 
 
 - Celian will explain how to read a vcf file
-Go to mentimeter (note to self : put link here)
+Go to mentimeter: https://www.menti.com/alvrtwtcrkj5
+(or use code 6182 8854)
 
 ```{bash,eval=FALSE}
 # INFO field
 
-grep '^##' pig.vcf | tail -n 20
+grep '^##' cow.vcf | tail -n 20
 
 # variants
-grep -v '^##' pig.vcf | more
+grep -v '^##' cow.vcf | more
 
 
 ```
@@ -409,13 +408,13 @@ SVTYPE=DEL;SVLEN=-60 : size and type of the variant
 
 Now you have variants! Lets see what genes are affected by the variants.
 
-First we will select a random variant to investigate
+First you will select a random variant to investigate
 
 
 ```{bash,eval=FALSE}
 #Check the number of variant in the file
 
-NBVAR=$(bcftools index -n pig.vcf)
+NBVAR=$(bcftools index -n cow.vcf)
 
 ## sample a random number
 
@@ -423,7 +422,7 @@ RANDOMVAR=$(echo $((RANDOM % $NBVAR + 1)))
 
 ## let's check the variant sampled
 
-bcftools view -H pig.vcf | sed -n ${RANDOMVAR}p
+bcftools view -H cow.vcf | sed -n ${RANDOMVAR}p
 
 ```
 
@@ -437,13 +436,13 @@ bcftools view -H pig.vcf | sed -n ${RANDOMVAR}p
 
 Variant Effect predictor tells us where in the genome the discovered variants are located (genic, regulatory, etc...)
 
-Select "pig" as the reference species.
+Select "cow" as the reference species.
 
 
 
 
 
-Upload: pig.vcf - downloaded from Orion or the section above as the file to investigate.
+Upload: cow.vcf - downloaded from Orion or the section above as the file to investigate.
 
 
 ![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image15.png){width=80%}
@@ -469,7 +468,7 @@ Find your variant by downloading the .txt file
 
 
 That's it ! You are now expert in genome analysis !
-If you’re considering undertaking a similar bioinformatics/genomics project for your master’s thesis, you can <a href="https://sites.google.com/view/saitou-lab/home">contact our lab</a>
+If you're considering undertaking a similar bioinformatics/genomics project for your master's thesis, you can <a href="https://sites.google.com/view/saitou-lab/home">contact our lab</a>
 
 
 

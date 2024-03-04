@@ -466,13 +466,32 @@ Let's closely investigate your variant !
 
 Find your variant by downloading the .txt file
 
-hint: you can use Ctrl+F and paste the ID of your variant to find it quickly !
+hint: Open the file and use Ctrl+F and paste the ID of your variant, which can be find in the vcf file
 
 If you don't find your variant, what does that mean ? Try another one !
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_19.png){width=80%}
 
+
+What does your variant look like in the sequence ? 
+
+[We can look at it on IGV](https://igv.org/)
+
+Select the cow reference genome - ARS-UCD1.2/bosTau9
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image17.PNG){width=80%}
+
+Then import the vcf from your computer
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image18.PNG){width=80%}
+
+
+You can select chr1 and put the location of your variant to look at it !
+
+hint: remember the location of your variant is in the vcf file
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image20.PNG){width=80%}
 
 That's it ! You are now expert in genome analysis !
 If you're considering undertaking a similar bioinformatics/genomics project for your master's thesis, you can <a href="https://sites.google.com/view/saitou-lab/home">contact our lab</a>

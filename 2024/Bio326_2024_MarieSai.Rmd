@@ -375,17 +375,30 @@ Now you got the variant file!
 # Investigate the variants
 
 
-- Celian will explain how to read a vcf file
+- Celian will explain how to read a vcf file</br>
 Go to mentimeter: https://www.menti.com/alvrtwtcrkj5
 (or use code 6182 8854)
+
+
+Copy the vcf in your directory
+
+```{bash,eval=FALSE}
+qlogin 
+
+cp /mnt/courses/BIO326/EUK/result_2024/cow_Control.vcf  /cow_Control.vcf 
+
+
+```
+
+Look inside the vcf
 
 ```{bash,eval=FALSE}
 # INFO field
 
-grep '^##' cow.vcf | tail -n 20
+grep '^##' cow_Control.vcf | tail -n 20
 
 # variants
-grep -v '^##' cow.vcf | more
+grep -v '^##' cow_Control.vcf | more
 
 
 ```
@@ -406,15 +419,15 @@ SVTYPE=DEL;SVLEN=-60 : size and type of the variant
 
 
 
-Now you have variants! Lets see what genes are affected by the variants.
+Now you have variants! Lets see which genes are affected by the variants.
 
-First you will select a random variant to investigate
+For that you will select a random variant to investigate.
 
 
 ```{bash,eval=FALSE}
 #Check the number of variant in the file
 
-NBVAR=$(bcftools index -n cow.vcf)
+NBVAR=$(grep -v '^##' cow_Control.vcf | wc -l)
 
 ## sample a random number
 
@@ -422,7 +435,7 @@ RANDOMVAR=$(echo $((RANDOM % $NBVAR + 1)))
 
 ## let's check the variant sampled
 
-bcftools view -H cow.vcf | sed -n ${RANDOMVAR}p
+grep -v '^##' cow_Control.vcf |  sed -n ${RANDOMVAR}p
 
 ```
 
@@ -441,27 +454,21 @@ Select "cow" as the reference species.
 
 
 
-
-Upload: cow.vcf - downloaded from Orion or the section above as the file to investigate.
-
-
-![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image15.png){width=80%}
-
-There are 428 variants; 88 genes are affected by these varaints.
+Upload: cow_Control.vcf - downloaded from Orion or the section above as the file to investigate.
 
 
-What are the most affected genes?
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image15.PNG){width=80%}
 
-Click "Filters" and set "Impact is HIGH" to select highly impact variants. 
-
-![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image16.png){width=80%}
-
-There are some frameshift/transcript ablation variants.
+There are 1481 variants; 344 genes are affected by these varaints.
 
 
 Let's closely investigate your variant !
 
 Find your variant by downloading the .txt file
+
+hint: you can use Ctrl+F and paste the ID of your variant to find it quickly !
+
+If you don't find your variant, what does that mean ? Try another one !
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_19.png){width=80%}

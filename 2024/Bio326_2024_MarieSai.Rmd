@@ -367,7 +367,7 @@ sniffles --input  cow.bam --vcf cow.vcf
 
 ```
 
-
+[bam and sam format](https://labs.epi2me.io/reviewing-bam/)
 
 
 Now you got the variant file!

@@ -1,0 +1,519 @@
+---
+title: "Bio326_2025"
+author: "MS and colleagues"
+date: "2025-01-26"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+
+# Overview of the tutorial
+
+Using the data from the Nanopore sequencing you conducted,
+
+Now the following sessions, we aim to:
+
+- Compare the read length and quality between the experimental conditions
+
+- Investigate how the read cleaning process affect the read yields
+
+- Identify the genomic variants from the sequence data
+
+- Interpret how the genomic variants affects the animal biologically
+
+
+And we will learn:
+
+ - How to use Orion and conduct genome analysis 
+ 
+ - Quality check, read filtering, mapping to the reference genome and variant calling
+
+ - How to interpret summary statistics of Nanopore sequence data
+
+ - How to identify and interpret genetic variants
+
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_overview.png){width=80%}
+
+
+
+
+[Using Orion](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md)
+
+[Prepare your computational tools with Conda](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
+
+
+
+# Reads quality check
+
+Overview:
+
+(1) Quality check -> Trimming of low quality reads -> Quality check
+
+(2) Compare the overall reads quality between conditions 
+
+
+## Connect to Orion and the prepare the tools
+
+Go to https://orion.nmbu.no/ at NMBU or with VPN.
+
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2022/prep1.png){width=80%}
+
+
+
+In the Terminal/Command prompt, go to your directory.
+
+[Review: the concept of current directry](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md#temporary-working-directory-faster-and-more-efficient-jobs)
+
+```{bash,eval=FALSE}
+cd your_directory
+```
+
+
+Let's make a directory for analysis and enter in it.
+
+```{bash,eval=FALSE}
+mkdir analysis # make directory "analysis"
+cd analysis # set the current directory "analysis"
+
+```
+
+Now, you will inspect the fastq file from your experiment, which contains Nanopore read information.
+
+## Check the read quality by Nanoplot
+###  Browse the inside of the read (fastq) file
+
+[Review: look into a file content in a command line](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
+
+
+Let's learn how a fastq file (sequencing reads) looks using a sample file.
+
+```{bash,eval=FALSE}
+zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | more
+```
+
+
+Now you are seeing the content of a fastq file. (.gz = compressed)
+
+Each entry in a FASTQ files consists of 4 lines:
+
+1. A sequence identifier with information about the sequencing run. (run time, run ID, cflow cell id ... )
+
+2. The sequence (the base calls; A, C, T, G and N).
+
+3. A separator, which is simply a plus (+) sign.
+
+4. The base call quality scores. These are Phred +33 encoded, using ASCII characters to represent the numerical quality scores." [quality score sheet](https://learn.gencore.bio.nyu.edu/ngs-file-formats/quality-scores/)
+
+- by [Illumina Knowledge](https://knowledge.illumina.com/software/general/software-general-reference_material-list/000002211)
+
+
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image1.PNG){width=80%}
+
+
+###  Get basic stats of the fastq file
+
+"zcat"-> look inside
+
+"wc" -> word count
+
+"-l" -> line
+
+```{bash,eval=FALSE}
+zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | wc -l
+```
+
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image2.PNG){width=80%}
+
+
+### **Discussion Point**
+
+Now you got the number of lines in the fastq file.
+
+How many sequence reads are in the fastq file?
+
+What is the quality of bp between 1 and 5? What is the quality of bp between 21 and 25? Why do you think they are different?
+
+
+<details>
+  <summary> **Need Help?** </summary>      
+
+We see that there are 364544 lines in the fastq file. 
+
+As we learned that "each entry in a FASTQ files consists of 4 lines", one read is corresponding to four lines. So in this file we have 364544/4 = 91136 reads.
+
+Hint for the 5 first bp: 
+```{bash,eval=FALSE}
+zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | sed -n 4p | cut -c 1-5
+```
+
+
+</details> 
+
+
+
+## Quality check by Nanoplot
+
+The original fastq files may contain low quality reads. In this step, we will use "Nanoplot" to see the quality and lentgh of each read.
+
+Make a slurm script to conduct the quality check on the sample file like below and run it. 
+
+
+[Review: make a slurm script and run it by sbatch](https://orion.nmbu.no/en/SLURM)
+
+
+
+```{bash,eval=FALSE}
+
+#!/bin/bash
+#SBATCH --job-name=Nanoplot  # sensible name for the job
+#SBATCH --mem=12G 
+#SBATCH --ntasks=1   
+#SBATCH --cpus-per-task=8
+#SBATCH --output=nanoplot_before 
+#SBATCH --account=nn9987k
+#SBATCH --time=20:00  
+
+
+##Activate conda environment
+module load StdEnv
+module load Miniconda3
+source ${EBROOTMINICONDA3}/bin/activate 
+
+
+conda activate /cluster/projects/nn9987k/.share/conda_environments/EUK_DRY
+
+echo "Working with this $CONDA_PREFIX environment ..."
+
+
+## run nanoplot
+
+NanoPlot -t 8  --fastq /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz --plots dot  --no_supplementary --no_static --N50 -p before_filter_A1
+
+
+```
+
+
+Nanoplot will generate the result files, named "before_filter_A1"xxx. Lets look into them... 
+
+[Review: File transfer between Orion and your computer](https://orion.nmbu.no/en/Copydata)
+
+
+```{bash,eval=FALSE}
+
+# taking too long?
+qlogin 
+
+cp /cluster/projects/nn9987k/BIO326-2025/day1/before_filter_A1NanoPlot-report.html  before_filter_A1NanoPlot-report.html
+
+```
+
+Open "before_filter_A1NanoPlot-report.html" on your local computer
+
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image3.PNG){width=80%}
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image4.PNG){width=80%}
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image5.PNG){width=80%}
+
+
+
+
+
+##Filtering by Nanofilt
+```{bash,eval=FALSE}
+
+#!/bin/bash
+#SBATCH --job-name=Nanofilt  # sensible name for the job
+#SBATCH --mem=12G 
+#SBATCH --ntasks=1   
+#SBATCH --output=nanofilt 
+#SBATCH --account=nn9987k
+#SBATCH --time=20:00  
+
+
+##Activate conda environment
+module load StdEnv
+module load Miniconda3
+source ${EBROOTMINICONDA3}/bin/activate 
+
+
+conda activate /cluster/projects/nn9987k/.share/conda_environments/EUK_DRY
+
+echo "Working with this $CONDA_PREFIX environment ..."
+
+
+## run nanoplot
+gunzip -c /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | NanoFilt -q 12 -l 1000 | gzip > cleaned_A1.fq.gz
+
+```
+
+
+-l,  Filter on a minimum read length
+
+-q, Filter on a minimum average read quality score
+
+In this case, we are removing reads lower than quality score 12 and shorter than 1000 bases.
+
+If you are ambitious, please adjust the filtering parameters and see how they change the result.
+
+(In that case, do not forget to name the result files differently.)
+
+## Compare the sequences before and after cleaning
+
+Run Nanoplot again on the cleaned sequences.
+
+
+<details>
+  <summary> **Need help?** </summary>      
+  
+```{bash,eval=FALSE}
+
+#!/bin/bash
+#SBATCH --job-name=Nanoplot  # sensible name for the job
+#SBATCH --mem=12G 
+#SBATCH --ntasks=1   
+#SBATCH --cpus-per-task=8
+#SBATCH --output=nanoplot_after 
+#SBATCH --account=nn9987k
+#SBATCH --time=20:00  
+
+
+##Activate conda environment
+module load StdEnv
+module load Miniconda3
+source ${EBROOTMINICONDA3}/bin/activate 
+
+
+conda activate /cluster/projects/nn9987k/.share/conda_environments/EUK_DRY
+
+echo "Working with this $CONDA_PREFIX environment ..."
+
+
+## run nanoplot
+
+NanoPlot -t 8  --fastq cleaned_A1.fq.gz --plots dot  --no_supplementary --no_static --N50 -p after_filter_A1
+
+
+```
+
+</details> 
+
+Open "after_filter_A1NanoPlot-report.html" on your local computer.
+
+```{bash,eval=FALSE}
+
+# taking too long?
+qlogin 
+
+cp /cluster/projects/nn9987k/BIO326-2025/day1/after_filter_A1NanoPlot-report.html after_filter_A1NanoPlot-report.html
+
+```
+
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image6.png){width=80%}
+
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image7.png){width=80%}
+
+
+
+
+### **Discussion Point**
+
+Did you see the difference of read and quality distribution between before and after the filtering?
+
+## **Your mission**
+
+Do the quality check and filtering, and compare the read length and quality between the four experimental conditions.
+
+
+# Mapping to the reference genome
+
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/BIO326-genome/Slide14.png){width=90%}
+
+
+
+## run Minimap and map the reads to the reference genome
+
+[cow genome](https://ftp.ensembl.org/pub/release-111/fasta/bos_taurus/dna/Bos_taurus.ARS-UCD1.3.dna.toplevel.fa.gz)
+
+
+```{bash,eval=FALSE}
+#!/bin/bash
+#SBATCH --job-name=Sniffles  # sensible name for the job
+#SBATCH --mem=18G 
+#SBATCH --ntasks=1   
+#SBATCH --cpus-per-task=8
+
+##Activate conda environment
+module load Miniconda3 && eval "$(conda shell.bash hook)"
+
+
+conda activate /mnt/courses/BIO326/EUK/condaenvironments/condaEUK
+
+echo "Working with this $CONDA_PREFIX environment ..."
+
+
+minimap2 -t 8 -a -a /mnt/courses/BIO326/EUK/cow_genome/Bos_taurus.ARS-UCD1.3.dna.toplevel.fa.gz  /mnt/courses/BIO326/EUK/result_2024/cleaned_cow_demo_data.fastq.gz > cow.sam
+
+
+# convert the sam file to bam format
+samtools view -S -b cow.sam > cow0.bam
+
+## sort the bam file
+samtools sort cow0.bam -o cow.bam
+
+# index the bam file
+samtools index -M  cow.bam
+
+# Variant Calling using Sniffles
+sniffles --input  cow.bam --vcf cow.vcf
+
+
+```
+
+[bam and sam format](https://labs.epi2me.io/reviewing-bam/)
+
+
+Now you got the variant file!
+
+# Investigate the variants
+
+
+- Celian will explain how to read a vcf file</br>
+Go to mentimeter: https://www.menti.com/alvrtwtcrkj5
+(or use code 6182 8854)
+
+
+Copy the vcf in your directory
+
+```{bash,eval=FALSE}
+qlogin 
+
+cp /mnt/courses/BIO326/EUK/result_2024/cow_Control.vcf  /cow_Control.vcf 
+
+
+```
+
+Look inside the vcf
+
+```{bash,eval=FALSE}
+# INFO field
+
+grep '^##' cow_Control.vcf | tail -n 20
+
+# variants
+grep -v '^##' cow_Control.vcf | more
+
+
+```
+
+
+![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image11.png){width=80%}
+
+Important parameters
+
+
+1	16849578 : location of the variant 
+
+SVTYPE=DEL;SVLEN=-60 : size and type of the variant
+
+0/1 : genotype 
+
+(you can open a vcf file in notepad, excel etc.)
+
+
+
+Now you have variants! Lets see which genes are affected by the variants.
+
+For that you will select a random variant to investigate.
+
+
+```{bash,eval=FALSE}
+#Check the number of variant in the file
+
+NBVAR=$(grep -v '^##' cow_Control.vcf | wc -l)
+
+## sample a random number
+
+RANDOMVAR=$(echo $((RANDOM % $NBVAR + 1)))
+
+## let's check the variant sampled
+
+grep -v '^##' cow_Control.vcf |  sed -n ${RANDOMVAR}p
+
+```
+
+
+
+## Estimate the effect of variants
+
+
+[Go to VEP (Variant Effect Predictor)](https://www.ensembl.org/Tools/VEP)
+
+
+Variant Effect predictor tells us where in the genome the discovered variants are located (genic, regulatory, etc...)
+
+Select "cow" as the reference species.
+
+
+
+
+Upload: cow_Control.vcf - downloaded from Orion or the section above as the file to investigate.
+
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image15.PNG){width=80%}
+
+There are 1481 variants; 344 genes are affected by these varaints.
+
+
+Let's closely investigate your variant !
+
+Find your variant by downloading the .txt file
+
+hint: Open the file and use Ctrl+F and paste the ID of your variant, which can be find in the vcf file
+
+If you don't find your variant, what does that mean ? Try another one !
+
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_19.png){width=80%}
+
+
+What does your variant look like in the sequence ? 
+
+[We can look at it on IGV](https://igv.org/)
+
+Select the cow reference genome - ARS-UCD1.2/bosTau9
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image17.PNG){width=80%}
+
+Then import the vcf from your computer
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image18.PNG){width=80%}
+
+
+You can select chr1 and put the location of your variant to look at it !
+
+hint: remember the location of your variant is in the vcf file
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image20.PNG){width=80%}
+
+That's it ! You are now expert in genome analysis !
+If you're considering undertaking a similar bioinformatics/genomics project for your master's thesis, you can <a href="https://sites.google.com/view/saitou-lab/home">contact our lab</a>
+
+
+
+
+
+
+

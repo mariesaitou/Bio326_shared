@@ -30,7 +30,7 @@ Now the following sessions, we aim to:
 
 And we will learn:
 
- - How to use Orion and conduct genome analysis 
+ - How to use Sigma2 and conduct genome analysis 
  
  - Quality check, read filtering, mapping to the reference genome and variant calling
 
@@ -44,7 +44,7 @@ And we will learn:
 
 
 
-[Using Orion](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md)
+[Using Sigma2](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesSigma2HPC.md)
 
 [Prepare your computational tools with Conda](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
 
@@ -59,17 +59,16 @@ Overview:
 (2) Compare the overall reads quality between conditions 
 
 
-## Connect to Orion and the prepare the tools
+## Connect to Sigma2 and the prepare the tools
 
-Go to https://orion.nmbu.no/ at NMBU or with VPN.
+[Let's review how to do so](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/HPC-101-WorkingWithSigma2.md)
 
-![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2022/prep1.png){width=80%}
 
 
 
 In the Terminal/Command prompt, go to your directory.
 
-[Review: the concept of current directry](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesOrionHPC.md#temporary-working-directory-faster-and-more-efficient-jobs)
+[Review: the concept of current directry](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesSigma2HPC.md#temporary-working-directory-faster-and-more-efficient-jobs)
 
 ```{bash,eval=FALSE}
 cd your_directory
@@ -167,7 +166,7 @@ The original fastq files may contain low quality reads. In this step, we will us
 Make a slurm script to conduct the quality check on the sample file like below and run it. 
 
 
-[Review: make a slurm script and run it by sbatch](https://orion.nmbu.no/en/SLURM)
+[Review: make a slurm script and run it by sbatch](https://Sigma2.nmbu.no/en/SLURM)
 
 
 
@@ -204,7 +203,7 @@ NanoPlot -t 8  --fastq /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz --pl
 
 Nanoplot will generate the result files, named "before_filter_A1"xxx. Lets look into them... 
 
-[Review: File transfer between Orion and your computer](https://orion.nmbu.no/en/Copydata)
+[Review: File transfer between Sigma2 and your computer](https://Sigma2.nmbu.no/en/Copydata)
 
 
 ```{bash,eval=FALSE}
@@ -345,7 +344,7 @@ Do the quality check and filtering, and compare the read length and quality betw
 
 ## run Minimap and map the reads to the reference genome
 
-[cow genome](https://ftp.ensembl.org/pub/release-111/fasta/bos_taurus/dna/Bos_taurus.ARS-UCD1.3.dna.toplevel.fa.gz)
+[speciesX genome](https://ftp.ensembl.org/pub/release-111/fasta/bos_taurus/dna/Bos_taurus.ARS-UCD1.3.dna.toplevel.fa.gz)
 
 
 ```{bash,eval=FALSE}
@@ -364,20 +363,20 @@ conda activate /mnt/courses/BIO326/EUK/condaenvironments/condaEUK
 echo "Working with this $CONDA_PREFIX environment ..."
 
 
-minimap2 -t 8 -a -a /mnt/courses/BIO326/EUK/cow_genome/Bos_taurus.ARS-UCD1.3.dna.toplevel.fa.gz  /mnt/courses/BIO326/EUK/result_2024/cleaned_cow_demo_data.fastq.gz > cow.sam
+minimap2 -t 8 -a -a /mnt/courses/BIO326/EUK/speciesX_genome/Bos_taurus.ARS-UCD1.3.dna.toplevel.fa.gz  /mnt/courses/BIO326/EUK/result_2024/cleaned_speciesX_demo_data.fastq.gz > speciesX.sam
 
 
 # convert the sam file to bam format
-samtools view -S -b cow.sam > cow0.bam
+samtools view -S -b speciesX.sam > speciesX0.bam
 
 ## sort the bam file
-samtools sort cow0.bam -o cow.bam
+samtools sort speciesX0.bam -o speciesX.bam
 
 # index the bam file
-samtools index -M  cow.bam
+samtools index -M  speciesX.bam
 
 # Variant Calling using Sniffles
-sniffles --input  cow.bam --vcf cow.vcf
+sniffles --input  speciesX.bam --vcf speciesX.vcf
 
 
 ```
@@ -400,7 +399,7 @@ Copy the vcf in your directory
 ```{bash,eval=FALSE}
 qlogin 
 
-cp /mnt/courses/BIO326/EUK/result_2024/cow_Control.vcf  /cow_Control.vcf 
+cp /mnt/courses/BIO326/EUK/result_2024/speciesX_Control.vcf  /speciesX_Control.vcf 
 
 
 ```
@@ -410,10 +409,10 @@ Look inside the vcf
 ```{bash,eval=FALSE}
 # INFO field
 
-grep '^##' cow_Control.vcf | tail -n 20
+grep '^##' speciesX_Control.vcf | tail -n 20
 
 # variants
-grep -v '^##' cow_Control.vcf | more
+grep -v '^##' speciesX_Control.vcf | more
 
 
 ```
@@ -442,7 +441,7 @@ For that you will select a random variant to investigate.
 ```{bash,eval=FALSE}
 #Check the number of variant in the file
 
-NBVAR=$(grep -v '^##' cow_Control.vcf | wc -l)
+NBVAR=$(grep -v '^##' speciesX_Control.vcf | wc -l)
 
 ## sample a random number
 
@@ -450,7 +449,7 @@ RANDOMVAR=$(echo $((RANDOM % $NBVAR + 1)))
 
 ## let's check the variant sampled
 
-grep -v '^##' cow_Control.vcf |  sed -n ${RANDOMVAR}p
+grep -v '^##' speciesX_Control.vcf |  sed -n ${RANDOMVAR}p
 
 ```
 
@@ -464,12 +463,12 @@ grep -v '^##' cow_Control.vcf |  sed -n ${RANDOMVAR}p
 
 Variant Effect predictor tells us where in the genome the discovered variants are located (genic, regulatory, etc...)
 
-Select "cow" as the reference species.
+Select "speciesX" as the reference species.
 
 
 
 
-Upload: cow_Control.vcf - downloaded from Orion or the section above as the file to investigate.
+Upload: speciesX_Control.vcf - downloaded from Sigma2 or the section above as the file to investigate.
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image15.PNG){width=80%}
@@ -493,7 +492,7 @@ What does your variant look like in the sequence ?
 
 [We can look at it on IGV](https://igv.org/)
 
-Select the cow reference genome - ARS-UCD1.2/bosTau9
+Select the speciesX reference genome - ARS-UCD1.2/bosTau9
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image17.PNG){width=80%}
 

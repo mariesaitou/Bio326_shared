@@ -400,7 +400,7 @@ TGCCACTTACTTCGTTCAGTTACGTATTGCTAAGGTTAAACAGACGACTACAAACGGAATCGACAGCACCTTAGAGACAA
 
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/blast.png){width=80%}
+![](images/blast.png){width=80%}
 
 </details>
 

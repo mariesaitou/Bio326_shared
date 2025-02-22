@@ -1,7 +1,7 @@
 ---
 title: "Bio326_2025"
 author: "MS and colleagues"
-date: "2025-01-26"
+date: "2025-02"
 output: 
   html_document:
     toc: true
@@ -17,7 +17,7 @@ output:
 
 Using the data from the Nanopore sequencing you conducted,
 
-Now the following sessions, we aim to:
+🎯 **Goals of this session:** 
 
 - Compare the read length and quality between the experimental conditions
 
@@ -28,7 +28,7 @@ Now the following sessions, we aim to:
 - Interpret how the genomic variants affects the animal biologically
 
 
-And we will learn:
+🎯 **We will learn:** 
 
  - How to use Sigma2 and conduct genome analysis 
  
@@ -44,15 +44,10 @@ And we will learn:
 
 
 
-[Using Sigma2](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesSigma2HPC.md)
 
-[Prepare your computational tools with Conda](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
+# Day 1 Read quality check
 
-
-
-# Reads quality check
-
-Overview:
+🔎 Overview:
 
 (1) Quality check -> Trimming of low quality reads -> Quality check
 
@@ -61,17 +56,17 @@ Overview:
 
 ## Connect to Sigma2 and the prepare the tools
 
+
+🚀In the Terminal/Command prompt, go to Sigma2 and your directory there.
+
 [Let's review how to do so](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/HPC-101-WorkingWithSigma2.md)
 
 
 
 
-In the Terminal/Command prompt, go to your directory.
-
-[Review: the concept of current directry](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/BestPracticesSigma2HPC.md#temporary-working-directory-faster-and-more-efficient-jobs)
 
 ```{bash,eval=FALSE}
-cd your_directory
+ssh yourID@saga.sigma2.no
 ```
 
 
@@ -88,17 +83,16 @@ Now, you will inspect the fastq file from your experiment, which contains Nanopo
 ## Check the read quality by Nanoplot
 ###  Browse the inside of the read (fastq) file
 
-[Review: look into a file content in a command line](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/SoftwareManagmentWithConda.md)
 
 
-Let's learn how a fastq file (sequencing reads) looks using a sample file.
+Let's learn how a fastq file (sequencing reads) looks using a sample file (1-A).
 
 ```{bash,eval=FALSE}
 zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | more
 ```
 
 
-Now you are seeing the content of a fastq file. (.gz = compressed)
+🔎 Now you are seeing the content of a fastq file. (.gz = compressed)
 
 Each entry in a FASTQ files consists of 4 lines:
 
@@ -135,15 +129,17 @@ zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | wc -l
 
 ### **Discussion Point**
 
-Now you got the number of lines in the fastq file.
+🔎 Now you got the number of lines in the fastq file.
 
 How many sequence reads are in the fastq file?
 
 What is the quality of bp between 1 and 5? What is the quality of bp between 21 and 25? Why do you think they are different?
 
+What is this species?
+
 
 <details>
-  <summary> **Need Help?** </summary>      
+  <summary> **Need Help? (click)** </summary>      
 
 We see that there are 364544 lines in the fastq file. 
 
@@ -163,10 +159,13 @@ zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | sed -n 4p | cut -c 1
 
 The original fastq files may contain low quality reads. In this step, we will use "Nanoplot" to see the quality and lentgh of each read.
 
-Make a slurm script to conduct the quality check on the sample file like below and run it. 
+
+🛠 Make a slurm script to conduct the quality check on the sample file like below and run it. 
 
 
-[Review: make a slurm script and run it by sbatch](https://Sigma2.nmbu.no/en/SLURM)
+
+
+[Review: make a slurm script and run it by sbatch](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/HPC-101-WorkingWithSigma2.md)
 
 
 
@@ -201,9 +200,13 @@ NanoPlot -t 8  --fastq /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz --pl
 ```
 
 
+
+
+
+
 Nanoplot will generate the result files, named "before_filter_A1"xxx. Lets look into them... 
 
-[Review: File transfer between Sigma2 and your computer](https://Sigma2.nmbu.no/en/Copydata)
+[Review: File transfer between Sigma2 and your computer](https://training.pages.sigma2.no/tutorials/hpc-intro/episodes/15-transferring-files.html)
 
 
 ```{bash,eval=FALSE}
@@ -215,7 +218,7 @@ cp /cluster/projects/nn9987k/BIO326-2025/day1/before_filter_A1NanoPlot-report.ht
 
 ```
 
-Open "before_filter_A1NanoPlot-report.html" on your local computer
+🔎 Open "before_filter_A1NanoPlot-report.html" on your local computer
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image3.PNG){width=80%}
@@ -257,6 +260,28 @@ gunzip -c /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | NanoFilt -q 12 
 ```
 
 
+This script activates a Conda environment (Your toolkit that Arturo pre-assembled) on a computing cluster:
+
+1. Load required modules
+
+module load StdEnv → Loads the standard environment.
+
+module load Miniconda3/23.10.0-1 → Loads Miniconda, a lightweight Conda
+distribution.
+
+2. Activate Conda
+
+source ${EBROOTMINICONDA3}/bin/activate → Activates Miniconda.
+
+conda activate EUK_DRY → Activates a specific Conda environment for the project.
+
+(3)  Confirm activation
+
+echo "Working with this $CONDA_PREFIX environment ..." → Indicates the currently active Conda environment.
+
+
+**Parameters**
+
 -l,  Filter on a minimum read length
 
 -q, Filter on a minimum average read quality score
@@ -265,15 +290,21 @@ In this case, we are removing reads lower than quality score 12 and shorter than
 
 If you are ambitious, please adjust the filtering parameters and see how they change the result.
 
-(In that case, do not forget to name the result files differently.)
+**(In that case, do not forget to name the result files differently.)**
+
+
+| Q Score < 10 | High error rate |
+| Length < 500bp | Too short for meaningful mapping |
+
+
 
 ## Compare the sequences before and after cleaning
 
-Run Nanoplot again on the cleaned sequences.
+🚀 Run Nanoplot again on the cleaned sequences.
 
 
 <details>
-  <summary> **Need help?** </summary>      
+  <summary> **Need help? (click)** </summary>      
   
 ```{bash,eval=FALSE}
 
@@ -307,7 +338,7 @@ NanoPlot -t 8  --fastq cleaned_A1.fq.gz --plots dot  --no_supplementary --no_sta
 
 </details> 
 
-Open "after_filter_A1NanoPlot-report.html" on your local computer.
+🔎 Open "after_filter_A1NanoPlot-report.html" on your local computer.
 
 ```{bash,eval=FALSE}
 
@@ -329,22 +360,70 @@ cp /cluster/projects/nn9987k/BIO326-2025/day1/after_filter_A1NanoPlot-report.htm
 
 ### **Discussion Point**
 
-Did you see the difference of read and quality distribution between before and after the filtering?
+- 1. Did you see the difference of read and quality distribution between before and after the filtering? Discuss within/between groups.
+
+- 2. What species is this? (That should be Eukaryote)
+
+Hint 1 ⚠️ **Notice!** The first few thousand reads might b eshort/unreliable.
+
+
+<details>
+<summary> Hint 2 🔍 Try looking at the **2001st read** (click) </summary>
+
+```{bash,eval=FALSE}
+zcat cleaned_A1.fq.gz | tail -n +2001 | awk 'NR%4==2 && length($0) > 1000' | head -1
+
+```
+</details>
+
+<details>
+<summary> Result: the **2001st read** (click) </summary>
+
+```{bash,eval=FALSE}
+TGCCACTTACTTCGTTCAGTTACGTATTGCTAAGGTTAAACAGACGACTACAAACGGAATCGACAGCACCTTAGAGACAAGCAAAGGAGACAGAAACTGGATAGAAGGTCAAATCATTAAACCCTCAGTACCTACCACAAGTGGGTTTTTTGAACTTCACATCCACTTTCCTCACATGCCATAGCTGTGCTAATATCTCTTTTATACACAAGAAAAAAAAAAAAAAAACTTCCCACATATGTAATTTTTTTCTCCCAAAATTTCTAATATCATCATGGTCACAAAATGACTGCCTCATCCCCAAGAATCTTATCTATGCTCCAGATAGGCTTCACTGAATAGGAGAAGCCCTTCCCAGTTTCTGGGGAAAAGATATAAATTTATGTATTACCAATTATTACATATTAATAACTATTTAAGTTGTGGTTTTCAGAAAGCTAACTGGCACCAAATATCCAATTTACTCTCTGGTCATTTAGTAAGCCTTATAATCAGCTCTCTGGGTAGTTGCTCCCTGTCATTCAAGGAATAAAGGAATGTGTGCATGTGTGTTCAGTCATTGAGTCATGTCTGACTTTGTGACCCCATGGACTGTAGTTGCCAGACTCCTCTATCCATGTGGTTCTCCAGGCAAGAATACTAGAGCGGGGGGTGGTGGGGAGTGAGTGGGGAGTATGATCAGAGAGACTCTTCCACTTATGCAGAGGAAGAATATTCCAGCCTCAAATTCAAGATGGCGAGTTGTCTGAATCCTGGTAAGAATTGCTATACTCTTGGTTCCACCATAGGATTGATTAGTACGTCAAAAGCAAAAACAATAACACATTCCTATTTCTTAGAAAAAGTGACTGTGAAACACAGCAGATGTGCTAGATGCCAAATACTCCCCAACTCTGGCCAGATCAACAGACGTGACGCCTGTCCAAATGCAAAGACAGCATAGAATCACCCAAGACCAATAAAATAATCATGATAATATAGCTAGCACAGCCTTTGTGGCAGGTATTATCATAAGTTTTTCACATAAAATAACCCACTTAATTCCCCACAACAACCTTATATGGGAAGAACTATTATTGTCTCTATTTTAAAGAAGAAGGAACCAGGAACAGGGAAGTTAAGTAATTTTGCTCATGGTCAACAGCTTGAAATTAGCATTCTGTCCCGAGAGTCTATGATTTTACCTACTATGCTGACCTAAAAGCATATATTCCCACAAGAAATGTACAATCCTATTAGAAAAAAGTCCAAATAAAAGTTACAAGAATACTCACAGACAAGGTATTAGATTGAACAGAAAAATTAAGGACTTGTAAGTGACACACTATGTTAATAAAGAGAGAATTTTCAATATCTCTAATCATTAGGGAAATGCAAATCAAAACTATCATGAGGTGTCATCTCATACCAATCAGAATGGCCATCAGCAAAAACTCTACAACTAATAAATGCTGGAGAGGGTGTGAAGAGAAAGGAACCCTCCTACTCTGTTGCTGAGAATGTAAATTGGTGGCCAATATGAAAAACAATATGAATGTTCCTTAAAAAACTAAAACTAGAGCTACCATATGATCACAGTCACACTGCTTGGCATATGTCCAGCAACAACCCTAACTTGTAAAGATACATGTGGCCCAATGCTCATTGCAGCACTCTTGACAACAGCCAAGCCATGGAAGCAAACTAAATGTCCATTGACAGATGAATGGATAAAGAAGATGCAATATATTTATACAATAATATTACTCAACTATAAAAAAGAATTAAATAATGTCATTTGCAGCAACATGGTTGAACCTAGAGATTATCATACTGCTGCTGCTGCTGCTAAGTCACTTCAGTCGTTTCTGACTCTGCGACCCCATAGACTGAAGCCCACCAGGCTTCCCCGTCCCTGGGATTCTCCAGGCAAGAACACTGGAGTGGGTTGCCATTTCCTTCTCCAATGCATGAAAGTGAAAATTGAAAGTGAAGTCGCTCAGTCGTGTCCGACTCTTAGCGACCCCATGGACTACAGCCTACCAGGCTCCTCCATGCATGGGATTTTCCAGGCAAGAGTACTGGAGTGGGGTGCCATTGCCTTCTCTGGATTATCATACTAAATGAAGTCAAAAACAAATATATACTTCATTTATATGTAGGATCTAACAAATGATACAATTGAACTTATTGAACAAATAAATTCATAAACATAGAAAACATTCTCATGGTTACCAAAGGGTTAGGGGGGCTAGTGAGGGGTGGGGAGAGATAAATTAGAAGTTTGAGATTAAAACTTACATACCTTGGTAGCTCAGCTGGTAAAGAATCCACCTGCAATGCAGGAGACCCCAGTTCAATTACTGAGTGGGAAAGATCTCCTGGAGAAGGTATACGCTACCCACTCCAGCATTCTTGCCTGGAGAATCCCCATGGACAGAGGAGCCTGGGAGGCTACAGTCCATGGGGCCACAAAGAATGGAAAACAACTGAGTGACTAAGCACACAGCACGACTTTGTATCAAATAAGTAAGCAACAAGGGCCTACTGTATAGCACAGGGAACTATACTTAACATCTTTTAATAACAGAAAGTGAAGAAGAACTAAAGGGCCTCTTGATGAAAGTATGTGAAAGAGGAGAGTGGAAAAAGTTGGCTTAAAGCTCAACATTCAGAAAACAAAGATCATGGCATCCGGTCCCATCACTTCATGGCAAATAGATGGGGAAACAATGGAAACAGTGGCTGACTTTATTTTTCTGGACTCTAAAATCCTGCAGATGGTGATTTCAGCAATGAAATTAAAAGACGCTTACTCCTTGGAAGGAAAGTTATGACCAACCTAGACAGCATATTAAAAAGCAGAGACATTACTTTATCAACAAAGGTCTGTCTAGTCAAGGCTATAGTTTTTCCAGTGGTCATGTATGGATGTGAGAGTTGGACTGTGAAGAAAGCTGAGTGCAGAAGAATTGATGCTTTTGAACTGTGGTGCTGGAGAAGACTCTTGAGAGTCTGCTGGACTGCAAGGAGATCCAACTAGTCCATCCTAAAGGAGATCAGTCCTGGGTGTTCATTGAAAGGACTGATGATGAAGCTGAAACTCCAATACTTTGGCCACCTGATGTGGAGAGCTGACTCATTTGAAAAGACCCTGATGCTTGGAAAAATTGAGGGCAGGAGGAGAAGGGGATGACAGAAGATGAGATGGTTGGGTGACATCACCGACTCAATGGACATGGGTTTGGGTGGACTTCGGGAGTTGGTGATGGACAGGGAGGCCTGGTGTGCTGTGGTTCATGGGGTTGCAAAGAGTTGGACACGACTGAGCAACTAAACTGAATGGAAAAGAATATATACATGGTATTTATGGACTTTCTTGGTGGCTCAGATGATAAAGAATCTATCTGCAGTTCAGGAGACCCGGGTTCGATCCCTGGGTTGGGAAGATCCCCTGGAGAAGGAAATGGCTACCTACTCTAATATACGTATATAACTGAATCACTTTTCTGTACACTGAAGCTAACACAACACTGTAACTTATACTTCAATTAAAAATAAAAATGAAAAATAAAAGAGCATTTTAATCAGAGAACACCCTGATTCTCTTTGAATTAAACACAACGGATGAGACTACATCTCTCTCCTGTTGCTGTTATTGTTCTTGTTGTTTTGTTTGAAGTTTGTCTAGTAATTGATCCTTTCAATGAACTGTGCTTTAAAAGTATATGCTAAACTTCCTTTCAAAATTTATAAATTTTTGCTTTCACCTTTTTTGCTCCCTTTTGTTTTACATTAGAGATTTGTGATAATATGTCTTGAACCAATTGTAGCTGAAAGCCCTGAAGTTATGCTAAAGATTGGGGTTGATTGATAGATAGCAAGCTCAGTTCTCCCTGTGTGTCCAAGAGCTGGTCAACACAGTTATCCAGCTATTCTGGCAGGTAGCTCTCTGGTTTTATCCTGTTGGTTAAAGAAATGGCCTCACCAGTGCAGATAATCTAACAGGAATAGGAGGCTTCTAACAGCAGTATGGCCTTCCTGAGTGTGCACTGGCCAGAAGAGCATGCCTTCAGATACAATAACCAATTCACCTGGGTTTGCCCAAGACTTTCTCAAGCTTAGCTCTGAAAGTCCCACATTCCAAAAATCCCTCTTTCATGGGACAACAGAAAGAATTGGTCATCCTAGGCCCAGTGCTGTCTTTGACCTTGGGTGAGGCAGTCCAATGTTGAGGCAGGAAACAGAGGTTTCAGAAAAAGACATATCTCAACTCCACCTCTGCCACTTACAGTATAATCTGGGACAAGCCATTTAAACCGAGACACCATTTTCTTTATCTGTAATATAAGGATAACAGCCCTGTGACTTTTTGAGAATTTAATCAGAAGTCATGAAAGATTTCTAGAAAAGTGTCTGGCATAAAGTAGCTGCCCAGCAAATAGTAGGTGTTATTACTATATTCCAGGAATTCTAAAATCAAATAGCAACTATAAAAGCAATTATGTCTAGACAGGTGGTATTTTGGGTTTTTTTTTTTTTTTTTTTTGGTTTCTTTTTTCTTAAATGGGATTATCTATGACTATGGTTATTTCCATTTTTAAAAGTCAATTCATTTGATCGGATTGATTGGCCAAAAATTCATGTTGACTCGTGCTAACTGTTGTAAGATCAAGCACTTTCAAACTTATTCATAAATAACATCCAAGTCATCTTTTCTAAATATTTAAGTTAACAATATAATTGCCTGCTACCCACAGAAGCATCTTCCTTTCAGTAGAATTTTAGAAAGAGGTACACAGAAGAAATACAAAAATGTCTAATTTTCTCCTTTAAGCTATGATATTCTACACTAACCCAGGTTTTTATGTAACAAAGCTCTGGTTTATACTAAGTACATTCTTTAATATTAATTGAAAAGAACTAATTTATAATCTTATGCTTTAACTTCTTGAAACTGACTAATTCTTTTAAAAGGTTTCCTAGGATAAGATCCATTAAATTTTATGATTTTGATTTTTGTATTGATAGTAAATCATTTTTCACCAATGATTTCTTTTGGTGTTTTGTTTTCTCTCAATTCTGAATACAGTTTCTTATACTTGAATTTTTAATAACACAAATAGGATGTATTTTGATTAATTAACTTTAAAATACAATTTCTGATAATCTATCTTCTATAATATATAGATTTTAATTCATAAACTCAAGTATTGATGGAACAGTGGTGCACTAGAATCTATTTTATCTATTTAAGAAATCTTTTCCATTGAGTACAACATTTAATAAGAATTTTCAAACTTTATGCAATATTTTTACTTCATAATAAAAATATAATTTAAATAATTTTTATAAGATTATTTTCCTACCTTAAGAACAAATTTACATTTGAGCCCATAAAGTTTTCAGTTTATGACACTATACAATTCAAGCTAAGCAGTTAAAAGATTCTGAGAAGGAAACTCGAATTGCTCAGAGAAAGTGTGAAATCCCATGTATTACTAAAAACTCAAAGGACTGTCTTGATCAAAAATTTTCTGAATACGTGGCAGGTGGATAATTCATTTAAAAAATTCCCCACCCACATTGTTCTCTGAAGTGTGTCTCAAAGTCCCATTCCTTAGCATAAAAGACATCTTGGTTTCTTTTTCTCAACATGTGTTTTTTTTTTTTTTTTTTAGTCAAACATATAATATTCAGTCTTGGGACATTACAGGAAATGTGATTTAGATTCTTCTCATTACTGCAGCATAACACAGAGGCACACATAAAAAATCCCCTCTCTGTGCTGCCTATGTTCCTCTTACACATTAGGTTTCTTAATTTTTTATTGAAGTATATCATGTAAGTTTCAGGTCTACAGCACAGCAATTCAGTTATATATATATGTGTGTGCGTGTGTGTGTGTGTGTGTGTGTATACATATATATGTATATATACATTCTTTTCCTTTTCTTTTCTTTTCAGATTCTTTTCTCTTATCATTTCAGTTCAGTTCAGTCGCTCAGTCGTGTCCAACTCTTTCTGACCCCATGAATCACAGCACGCCAGGCCTCCCTGTCCATCACCAACTCCCAGAGATCACTCAAACTCACGTCCATCGAGTTAGTGATGCCATCCAGCCATCTCATCTTCTGTCGTCCCCTTCTCCTCCTGCCTCCAATCCCTCCCAGCATCAGAGTCTTTTCCAATGAGTCAACTCTTTGCATGAGGTGGCCAAAGTCTTCAACCAGTTTAGCATCAGTCCTTCCAAAGAACACACAGGGCTGATCTCCTGTAGAATGGACTGGTTAGATCTCCTTGCAGACCAAGGGACTCTCGAGAGTTTTCTCCAACACTACAGTTCAAAAGCATTAATTCTTCAGCGCTCAGCTTTCTTCACAGTCCAACTTTCACATCCATACATGACCACAGGAAAAACCATAGCCTTGACTAGACGGACCTCAGTTGGCAAAGTAATGTCTCTGCTTTTGAATATACTATCTAGGTTGGTCATAACTTTCCTTCCAAGGAGTAAGCGTCTTTTAATTTCATGGCTTCAGTCACCATCTGCAGTGATTTTGGAGCCCAAAAGAATAAAATCTGACACTGTTTCCACTGTTTCCCCATCTATTTCTAATGAAGTGATGGGACCAGATGCCATGATCTTTGTTTTCTGAATGTTGAGCTTTAAGCCAACTTTTTCACTCTCCTCTTTCACTTTCATCAAGAGGCTTTTTAAGTTCCTCTTCACTTTCTGCCATAAGGGTGGTGTCATCTGCATATCTGAGGTTATTGATATTTCTCCAGGCAATCTTGATTCCAGCTTGTGCCTCTTCCAGCCCAGCGTTTCTCATTATGTACTCTGCATATGTACTTTTCTCTTATCAGATCAGATAAGATCAGATCAGTCACTCAGTCGTGTCTGACTCTTTGCGACCCCATGAATCCCAGCACACCAGGCCTCCCTGTCCATCACCAACTCCCGGAGTTCACTCAAACTCACGCCCATCGAGTTCAGTGATGCCATCCAGCCATCTCATCCTCTGTCCTCCCCTTCTCCTCTTGCCCTCAATCCCTCCCACCATCAGAGTCTTTTCCAATGAGTCAACTCTTCACATGAAGGTGGCCAAGTCCTCTGTTTGAATCCATTTCCTCATTTCCTCCAAACCCACTTCCTGTCCTTCAAAATGGACTCATCATCTACTCACAGTCCAAGGGACTCTCAAGAGTCTTCTCCAACACCACAGTTCAAAAGCATCAATTCTTCAGTGCTCAGCCTTCTTCACAACTACGAGCCTCACTTTAGCTGAGTATACTTCCCTGTGCCATACAGTGGGTCCATGTTACTTACATATTTTATACGTAGTGGAGTATATAAATTAATCCCAGCCTCCTAATTTATCCCTCTCCCTCCCACCTTTCCCTTTGGTAAGTGTAAGTTTGTTTTCTGTGTCCATGAGTCTCTTTCAAACATCAGTTCTTTAAGTAAAATTCATGTCAATGTTTTAAGAAATAAAGGACTGTCTTTTCAATTATTTTTTATACATTTCATATAATATCTTATCTGTTCTCTGCTCCCAGATTTTTGATAACTCTAGGACCTCTGAGATGAGTCCTGACACATTCAGTGACCACATTAAGCATTTTCAGTCCAGAGCCCAGAAAGCTTGACTATGTTTCAAAATGGGTAGAAACATTTCTGAATAAAAGTCTTTTTATTCCTAATATGTTATACTTGTCAAAAGCACATTGGGTGCTCACTTCACCAGCACATATACTAAAATTGAAATGATCCAGAGATTAGCATGGCCCCTGTGCAAAGATGACACACAAATTTGTGAAGCATTCCTTATTTTTCTGTATGACTCAGGGAACTCAAACAGGGGCTCTGTATCAACCTAGAGGGTGAATTGGGGAGGGAGATGGGAGGAAGGTTCAAGAGGGAAGGGACATATGTATACCTATGGCTGATTCATGTTGAGGTTTGACAGAAAACATCAAAATTCTGTAAAGCAATTATCCTTCAACTGTAAAATAAATAAAATTTTAAAAGAAAGAAAAAGCACATTGGATCTGCCAGATAAGCAAATATTTACTAATCTAATTTGTTGCCAATGTTGCAAGCAGGTTACTTTACAAATAGCTGACTGGGAACTTCAGCGGCAATAGAAATTGCTAAAGTGACTTATTCACTCAAATGCTTTTAAACCATATTGTATTCTTGGATTCCAATAATAATTCCATCCACTCAATGGCAATTCTAGTGCAATCCCATCCACTCAATTGAACCAACCAAGAAAAACCAAATACATCTGAATGCCTAAGAATTCATCATAAATTGGTGGTTCAGTTTTGATCCTTAGAAGGAAAACTAAAATGAATACCACAGATTGCTCTAACTATTCTCCAGTACTTTAGAGATACAAAATACAGGATTTAAAACTTTCACTAAATCATATATGCACCACCCCCACTAAACAGAATTCTTTTACTGGAGGAACAAAATTACATGGGTATGTTTCTGAGAGCTCATGTTGAGACATTTCTTTCCATTATTTCCATACCTTTTTCTAAATTGCTGTTTATTGGCAAAATAAACTGAAAGTCATTATTATTCTTCCACCTGATTTGGATATGAAACTTGGCCTTACTCTTAGAGCTAGATAATTTAGCTCCAGAGTACTAAAAAAAAAAAAAAAGTCCACATTTTTCATCTAAAACTTGTTATGGTAGGTATAATGTTCCAGCTGATAGCCTGACCTGTTTTTAAAAATGGAAATTTTTCAAAAACCATGAAAGTACATGTTATTTTCTCTTTTTCATTGATCACTTTTCATTGAAATATTGTTTATTTTAGAGAACCTTGAAACTGGTTTATCATAGTAATAAAATGTCAACATTCTAGGTAGGTCAAATTTTGTCCACAACAAATGTAAGGTTTAAAAACTTAATTTGTAAGAATAAATATTGTTTTGCCTATTGAATAAAAACTAAAGAAAAATCATATCTGTAACTACAATGGAATATAACCAAATTGTTCAGAATGCCATTTTAGAAATTTGGTATCATTTTCTAAAATGAAAATACATTTACGTCATTTTCCCCATTTACTGTAAACCCAGTTTTCTAGTAGAATGGGGAAAAATACTTAAATTGTAAAACAAAACATTCCCAAATCACTGAAAAATTCTTCAGCTGTGAAATCAATGTGTGTTTTTGAGATTTGCTGTGAAATTTTCAGCTAAACTTCATCTTTGTAAGTGAAAGCTAAAAGCTTCTTCACTGTTTCCATATAAGTAATGGCTTATTTGACCGGCATTTTTTTTTCTTTAAAAAAAATTCTTTCCCTACTAACCTTTCCTCTAAATGCAAAGAAATATAATCTCCTTGATTCTAAGTACTTTGCAAACCCTGTAAAAATTTAAAACTATGAGGTGCTGTCGATTCCGTTTGTAGTCGTCTGTTTAACCTTAGCAATACAT
+```
+</details>
+
+
+<details>
+<summary> Hint 3 (click) </summary>
+🧬 Run a [**nucleotide BLAST search**](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome) to search the sequence against a public genetic database.
+</details>
+
+<details>
+<summary>Hint 4 (click)</summary>
+🐄 **Many hits are from ...what species...? And one species looks obviously different! What is it?? **  
+</details>
+
+<details>
+<summary>Result</summary>
+
+
+
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/blast.png){width=80%}
+
+</details>
+
+
+
+
 
 ## **Your mission**
 
-Do the quality check and filtering, and compare the read length and quality between the four experimental conditions.
+Do the quality check and filtering, and compare the read length and quality between the four experimental conditions you have conducted!!
 
 
-# Mapping to the reference genome
+# Day2 Mapping to the reference genome
 
 ![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/BIO326-genome/Slide14.png){width=90%}
+### What is Read Mapping?  
+- Aligning sequencing reads to a reference genome.  
+- Essential for variant detection to find out which region is different from your sample and standard sample.  
+
 
 
 
 ## run Minimap and map the reads to the reference genome
-
-[speciesX genome](https://ftp.ensembl.org/pub/release-111/fasta/bos_taurus/dna/Bos_taurus.ARS-UCD1.3.dna.toplevel.fa.gz)
 
 
 ```{bash,eval=FALSE}
@@ -383,12 +462,52 @@ sniffles --input  control.bam --vcf control.vcf
 
 ```
 
+
+
+## The Sniffles Variant Calling Script
+
+| **Command** | **Explanation** |
+|------------|----------------|
+| `#!/bin/bash` | Declares that this script should be executed using the Bash shell. |
+| `#SBATCH --job-name=Sniffles` | Names the job "Sniffles" in the SLURM job scheduler. |
+| `#SBATCH --mem=12G` | Allocates 12GB of memory for the job. |
+| `#SBATCH --ntasks=1` | Requests 1 task (single execution unit). |
+| `#SBATCH --cpus-per-task=8` | Allocates 8 CPU cores for the task. |
+| `#SBATCH --output=mapping` | Specifies the output log file name as `mapping`. |
+| `#SBATCH --account=nn9987k` | Uses project account `nn9987k` for resource allocation. |
+| `#SBATCH --time=1:00:00` | Sets a time limit of 1 hour for the job. |
+
+---
+
+| `module load StdEnv` | Loads the standard environment modules. |
+| `module load Miniconda3/23.10.0-1` | Loads the Miniconda module (version `23.10.0-1`). |
+| `source ${EBROOTMINICONDA3}/bin/activate` | Activates the Miniconda environment. |
+| `echo "Working with this $CONDA_PREFIX environment ..."` | Prints the active Conda environment to verify it is correctly set. |
+
+---
+
+| `minimap2 -t 8 -a cleaned_control.fastq.gz > control.sam` | Uses **Minimap2** to map the cleaned reads (`cleaned_control.fastq.gz`) to the **Bos taurus** reference genome (`.fa.gz`) and saves the output as a **SAM file (`control.sam`)**. |
+| `samtools view -S -b control.sam > control_temp.bam` | Converts the **SAM file** to a **BAM file (`control_temp.bam`)**, which is a compressed binary format. |
+| `samtools sort control_temp.bam -o control.bam` | Sorts the BAM file and outputs a final sorted version as `control.bam`. |
+| `samtools index -M control.bam` | Indexes the BAM file so that it can be queried efficiently. |
+
+---
+
+| `sniffles --input control.bam --vcf control.vcf` | Uses **Sniffles** to identify structural variants in the **control BAM file** and outputs them in **VCF format (`control.vcf`)**. |
+
+---
+
+
+
+### What is Variant Calling?  
+- Identifying differences between sequenced DNA and a reference genome.  
+- Important for studying mutations and genetic variation.  
 [bam and sam format](https://labs.epi2me.io/reviewing-bam/)
 
 
 Now you got the variant file!
 
-# Investigate the variants
+# 🔍Investigate the variants
 
 
 - Celian will explain how to read a vcf file</br>
@@ -434,6 +553,13 @@ SVTYPE=DEL;SVLEN=-60 : size and type of the variant
 (you can open a vcf file in notepad, excel etc.)
 
 
+| **field** | **Explanation** |
+|------------|----------------|
+| CHROM | Chromosome name |
+| POS | Variant position |
+| REF | Reference allele (reference version) |
+| ALT | Alternate allele (your sample's version) |
+
 
 Now you have variants! Lets see which genes are affected by the variants.
 
@@ -457,7 +583,7 @@ grep -v '^##' control.vcf |  sed -n ${RANDOMVAR}p
 
 
 
-## Estimate the effect of variants
+## 🔍Estimate the effect of variants (!contains spoiler!)
 
 
 [Go to VEP (Variant Effect Predictor)](https://www.ensembl.org/Tools/VEP)
@@ -482,9 +608,9 @@ Let's closely investigate your variant !
 
 Find your variant by downloading the .txt file
 
-hint: Open the file and use Ctrl+F and paste the ID of your variant, which can be find in the vcf file
+Hint: Open the file in textedit or Excel and use Ctrl+F and paste the ID of your variant, which can be find in the vcf file.
 
-If you don't find your variant, what does that mean ? Try another one !
+If you don't find your variant, what does that mean? Try another one!
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_19.png){width=80%}
@@ -505,11 +631,12 @@ Then import the vcf from your computer
 
 You can select chr1 and put the location of your variant to look at it !
 
-hint: remember the location of your variant is in the vcf file
+Hint: remember the location of your variant is in the vcf file
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image20.PNG){width=80%}
 
-That's it ! You are now expert in genome analysis !
+🏆That's it ! You are now expert in genome analysis !🏆
+
 If you're considering undertaking a similar bioinformatics/genomics project for your master's thesis, you can <a href="https://sites.google.com/view/saitou-lab/home">contact our lab</a>
 
 

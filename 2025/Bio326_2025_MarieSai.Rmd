@@ -108,7 +108,7 @@ Each entry in a FASTQ files consists of 4 lines:
 
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image1.PNG){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image1.PNG){width=80%}
 
 
 ###  Get basic stats of the fastq file
@@ -124,7 +124,7 @@ zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | wc -l
 ```
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image2.PNG){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image2.PNG){width=80%}
 
 
 ### **Discussion Point**
@@ -221,11 +221,11 @@ cp /cluster/projects/nn9987k/BIO326-2025/day1/before_filter_A1NanoPlot-report.ht
 🔎 Open "before_filter_A1NanoPlot-report.html" on your local computer
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image3.PNG){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image3.PNG){width=80%}
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image4.PNG){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image4.PNG){width=80%}
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image5.PNG){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image5.PNG){width=80%}
 
 
 
@@ -293,8 +293,8 @@ If you are ambitious, please adjust the filtering parameters and see how they ch
 **(In that case, do not forget to name the result files differently.)**
 
 
-| Q Score < 10 | High error rate |
-| Length < 500bp | Too short for meaningful mapping |
+| Q Score < 12 | High error rate |
+| Length < 1000bp | Too short for meaningful mapping |
 
 
 
@@ -350,10 +350,10 @@ cp /cluster/projects/nn9987k/BIO326-2025/day1/after_filter_A1NanoPlot-report.htm
 ```
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image6.png){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image6.png){width=80%}
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image7.png){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image7.png){width=80%}
 
 
 
@@ -364,7 +364,7 @@ cp /cluster/projects/nn9987k/BIO326-2025/day1/after_filter_A1NanoPlot-report.htm
 
 - 2. What species is this? (That should be Eukaryote)
 
-Hint 1 ⚠️ **Notice!** The first few thousand reads might b eshort/unreliable.
+Hint 1 ⚠️ **Notice!** The first few thousand reads might be short/unreliable.
 
 
 <details>
@@ -434,7 +434,7 @@ Do the quality check and filtering, and compare the read length and quality betw
 #SBATCH --cpus-per-task=8
 #SBATCH --output=mapping 
 #SBATCH --account=nn9987k
-#SBATCH --time=1:00:00  
+#SBATCH --time=20:00  
 
 ##Activate conda environment
 module load StdEnv
@@ -475,7 +475,7 @@ sniffles --input  control.bam --vcf control.vcf
 | `#SBATCH --cpus-per-task=8` | Allocates 8 CPU cores for the task. |
 | `#SBATCH --output=mapping` | Specifies the output log file name as `mapping`. |
 | `#SBATCH --account=nn9987k` | Uses project account `nn9987k` for resource allocation. |
-| `#SBATCH --time=1:00:00` | Sets a time limit of 1 hour for the job. |
+| `#SBATCH --time=20:00` | Sets a time limit of 20 minutes for the job. |
 
 ---
 
@@ -504,6 +504,8 @@ sniffles --input  control.bam --vcf control.vcf
 - Important for studying mutations and genetic variation.  
 [bam and sam format](https://labs.epi2me.io/reviewing-bam/)
 
+Note: Mapping and variant calling is time consuming, but you can find the output file here: /cluster/projects/nn9987k/BIO326-2025/day2/control.vcf
+
 
 Now you got the variant file!
 
@@ -511,8 +513,8 @@ Now you got the variant file!
 
 
 - Celian will explain how to read a vcf file</br>
-Go to mentimeter: https://www.menti.com/alvrtwtcrkj5
-(or use code 6182 8854)
+Go to mentimeter: https://www.menti.com/al74tk7yrm9h
+(or use code 7641 4896)
 
 
 Copy the vcf in your directory
@@ -563,7 +565,9 @@ SVTYPE=DEL;SVLEN=-60 : size and type of the variant
 
 Now you have variants! Lets see which genes are affected by the variants.
 
-For that you will select a random variant to investigate.
+Since there are many variants it can be difficult to know where to start
+
+Let's select a random variant for yourself to investigate.
 
 
 ```{bash,eval=FALSE}
@@ -599,9 +603,9 @@ Select "cow" as the reference species.
 Upload: control.vcf - downloaded from Sigma2 or the section above as the file to investigate.
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image15.PNG){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image15.PNG){width=80%}
 
-There are 1481 variants; 344 genes are affected by these varaints.
+There are 14467 variants; 4618 genes are affected by these varaints.
 
 
 Let's closely investigate your variant !
@@ -629,7 +633,7 @@ Then import the vcf from your computer
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image18.PNG){width=80%}
 
 
-You can select chr1 and put the location of your variant to look at it !
+You can select the chromosome and put the location of your variant to look at it !
 
 Hint: remember the location of your variant is in the vcf file
 

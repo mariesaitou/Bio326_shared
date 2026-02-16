@@ -15,43 +15,73 @@ output:
 
 # Overview of the tutorial
 
-Using the data from the Nanopore sequencing you conducted,
+This R Markdown document provides the analytical workflow required to process and interpret the sequencing data generated during the wet lab. 
 
-🎯 **Goals of this session:** 
+The structure, format, and assessment criteria of the written report and oral presentation are defined in the official course guides. This document focuses on the analytical components that generate the data and figures used in those assessments.
 
-- Compare the read length and quality between the experimental conditions
+---
 
-- Investigate how the read cleaning process affect the read yields
+## Learning objectives and course alignment
 
-- Identify the genomic variants from the sequence data
+This practical supports the course Learning Outcomes as follows:
 
-- Interpret how the genomic variants affects the animal biologically
-
-
-🎯 **We will learn:** 
-
- - How to use Sigma2 and conduct genome analysis 
- 
- - Quality check, read filtering, mapping to the reference genome and variant calling
-
- - How to interpret summary statistics of Nanopore sequence data
-
- - How to identify and interpret genetic variants
-
-
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/image_overview.png){width=80%}
+- Understanding nanopore sequencing principles and raw data quality assessment (Knowledge)
+- Understanding library preparation concepts (Knowledge)  
+- Aligning reads to a reference genome and detecting genomic variants (Knowledge / Skills)
+- Critically assessing wet and dry lab results (Skills)  
+- Applying methods to a defined scientific question (General competence)  
+- Communicating scientific results (General competence)  
 
 
 
 
 
-# Part A. Read quality check
 
-🔎 Overview:
 
-(1) Quality check -> Trimming of low quality reads -> Quality check
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/Overview_2026_bio326.png){width=80%}
 
-(2) Compare the overall reads quality between conditions 
+### Data usage and analytical structure
+
+Part A is conducted using the sequencing data generated from your own wet lab experiment.  
+The objective is to directly compare how different physical DNA treatments (Control, Vortex, Needle, Temperature stress) influence sequencing performance metrics, including read length distribution, sequencing yield, and base quality before and after filtering.  
+This section establishes the causal link between laboratory manipulation and sequencing outcomes.
+
+
+
+Parts B and C extend the analysis to mapping, structural variant detection, and biological interpretation.  
+Because full mapping and variant calling workflows on complete raw datasets are computationally intensive and require extended runtime on HPC infrastructure, a pre-processed and region-restricted dataset derived from previous sequencing runs is used for these sections.  
+
+
+
+This ensures that all students can complete the advanced analytical workflow within the allocated practical session while working with high-quality, reproducible example data suitable for interpretation in IGV and downstream biological analysis.
+
+Together, Part A and Parts B–C form a coherent analytical progression:  
+from experimental manipulation and quality assessment (wet-to-sequencing outcomes) to genomic localization and biological interpretation (sequencing-to-function).
+
+
+
+# Part A. Read quality check (Core Activity)
+
+## Overview
+### Objective
+
+To quantitatively evaluate how different physical DNA treatments (Control, Vortex, Needle shearing, and Temperature extreme) influence long-read sequencing performance by comparing read length distribution, sequencing yield, and base quality metrics before and after quality filtering.
+
+### Experimental origin of the sequencing data
+
+The FASTQ files analyzed in this section originate from four treatments performed during the wet laboratory session:
+
+- Control  
+- Vortex  
+- Needle shearing  
+- Temperature extreme (freeze–thaw stress)
+
+Following DNA extraction, concentrations were quantified using Qubit fluorometry.  
+Samples were normalized to equal DNA mass per barcode, barcoded individually, pooled, and sequenced using Oxford Nanopore technology.
+
+
+
+
 
 
 ## Connect to Sigma2 and the prepare the tools
@@ -60,8 +90,6 @@ Using the data from the Nanopore sequencing you conducted,
 🚀In the Terminal/Command prompt, go to Sigma2 and your directory there.
 
 [Let's review how to do so](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/HPC-101-WorkingWithSigma2.md)
-
-
 
 
 
@@ -78,80 +106,100 @@ cd analysis # set the current directory "analysis"
 
 ```
 
+
 Now, you will inspect the fastq file from your experiment, which contains Nanopore read information.
 
-## Check the read quality by Nanoplot
-###  Browse the inside of the read (fastq) file
 
 
+### DNA Quantification and Barcoding Overview
 
-Let's learn how a fastq file (sequencing reads) looks using a sample file (1-A).
+Before proceeding with the analysis, review the metadata corresponding to your assigned group.
 
-```{bash,eval=FALSE}
-zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | more
+Please identify:
+
+- Your **Sample ID**
+- The corresponding **Treatment condition**
+- The assigned **Barcode ID**
+
+You can find the complete overview of samples and barcodes in [the shared spreadsheet](https://docs.google.com/spreadsheets/d/1VvkG2FId57kSaE9hbZ7QUlzNcrFbAd9GI68F0T_QA5I/edit?gid=0#gid=0)
+
+
+Confirm that the FASTQ file you are working with matches your assigned barcode and treatment condition before running NanoPlot.
+
+---
+
+## Explore the structure of a FASTQ file
+
+### Inspect the file structure
+
+Open your FASTQ file and examine its structure.
+
+```{bash, eval=FALSE}
+zcat YourSample.fq.gz | head -20
 ```
 
 
-🔎 Now you are seeing the content of a fastq file. (.gz = compressed)
+FASTQ format uses 4 lines per read:
+1. Header
+2. Sequence
+3. "+"
+4. Quality string
 
-Each entry in a FASTQ files consists of 4 lines:
 
-1. A sequence identifier with information about the sequencing run. (run time, run ID, cflow cell id ... )
-
-2. The sequence (the base calls; A, C, T, G and N).
-
-3. A separator, which is simply a plus (+) sign.
-
-4. The base call quality scores. These are Phred +33 encoded, using ASCII characters to represent the numerical quality scores." [quality score sheet](https://learn.gencore.bio.nyu.edu/ngs-file-formats/quality-scores/)
+FASTQ files contain both nucleotide sequences and per-base [quality scores](https://help.basespace.illumina.com/files-used-by-basespace/quality-scores)
 
 - by [Illumina Knowledge](https://knowledge.illumina.com/software/general/software-general-reference_material-list/000002211)
 
+---
 
+###  Count total lines and calculate number of reads
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image1.PNG){width=80%}
-
-
-###  Get basic stats of the fastq file
-
-"zcat"-> look inside
-
-"wc" -> word count
-
-"-l" -> line
-
-```{bash,eval=FALSE}
-zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | wc -l
+```{bash, eval=FALSE}
+zcat YourSample.fq.gz | wc -l
 ```
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image2.PNG){width=80%}
+FASTQ uses 4 lines per read.
+
+You can calculate reads with:
+
+    LINES=$(zcat YourSample.fq.gz | wc -l)
+    echo $((LINES / 4))
 
 
-### **Discussion Point**
-
-🔎 Now you got the number of lines in the fastq file.
-
-How many sequence reads are in the fastq file?
-
-What is the quality of bp between 1 and 5? What is the quality of bp between 21 and 25? Why do you think they are different?
-
-What is this species?
+The total number of reads reflects **sequencing yield.**
+This will later be compared between treatments and after filtering.
 
 
-<details>
-  <summary> **Need Help? (click)** </summary>      
+---
 
-We see that there are 364544 lines in the fastq file. 
 
-As we learned that "each entry in a FASTQ files consists of 4 lines", one read is corresponding to four lines. So in this file we have 364544/4 = 91136 reads.
+### Compare quality positions
 
-Hint for the 5 first bp: 
-```{bash,eval=FALSE}
-zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | sed -n 4p | cut -c 1-5
+```{bash, eval=FALSE}
+zcat YourSample.fq.gz | sed -n 4p | cut -c 1-5
+zcat YourSample.fq.gz | sed -n 4p | cut -c 21-25
 ```
 
+Quality scores are encoded using Phred+33.
+Quality may vary along the read due to sequencing chemistry.
 
-</details> 
+---
+
+
+### Extract one read longer than 10 kb
+
+```{bash, eval=FALSE}
+zcat YourSample.fq.gz | awk 'NR%4==2 && length($0) > 10000 {print; exit}'
+```
+
+Long reads are a key advantage of Nanopore sequencing.
+Read length distribution will later be compared across treatments.
+
+
+
+
+
 
 
 
@@ -160,9 +208,7 @@ zcat /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | sed -n 4p | cut -c 1
 The original fastq files may contain low quality reads. In this step, we will use "Nanoplot" to see the quality and lentgh of each read.
 
 
-🛠 Make a slurm script to conduct the quality check on the sample file like below and run it. 
-
-
+Make a slurm script to conduct the quality check on the sample file like below and run it. 
 
 
 [Review: make a slurm script and run it by sbatch](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/HPC-101-WorkingWithSigma2.md)
@@ -202,8 +248,6 @@ NanoPlot -t 8  --fastq /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz --pl
 
 
 
-
-
 Nanoplot will generate the result files, named "before_filter_A1"xxx. Lets look into them... 
 
 [Review: File transfer between Sigma2 and your computer](https://training.pages.sigma2.no/tutorials/hpc-intro/episodes/15-transferring-files.html)
@@ -218,7 +262,7 @@ cp /cluster/projects/nn9987k/BIO326-2025/day1/before_filter_A1NanoPlot-report.ht
 
 ```
 
-🔎 Open "before_filter_A1NanoPlot-report.html" on your local computer
+🔎 Open "before_filter_A1NanoPlot-report.html" on your local computer. Then you will see something like below:
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image3.PNG){width=80%}
@@ -229,9 +273,22 @@ cp /cluster/projects/nn9987k/BIO326-2025/day1/before_filter_A1NanoPlot-report.ht
 
 
 
+<details>
+<summary><strong>How to interpret these metrics</strong></summary>
+
+- Compare mean vs median read length. A large difference suggests a skewed distribution with a long tail of very long reads.  
+- N50 reflects the read length at which 50% of the total bases are contained in reads of that length or longer.  
+- Compare mean read quality and median read quality. Differences may indicate heterogeneity in read quality distribution.
 
 
-##Filtering by Nanofilt
+Together, these metrics capture the trade-off between yield and quality before and after filtering.
+
+</details>
+
+
+
+
+## Filtering by Nanofilt
 ```{bash,eval=FALSE}
 
 #!/bin/bash
@@ -275,7 +332,7 @@ source ${EBROOTMINICONDA3}/bin/activate → Activates Miniconda.
 
 conda activate EUK_DRY → Activates a specific Conda environment for the project.
 
-(3)  Confirm activation
+3.  Confirm activation
 
 echo "Working with this $CONDA_PREFIX environment ..." → Indicates the currently active Conda environment.
 
@@ -300,11 +357,12 @@ If you are ambitious, please adjust the filtering parameters and see how they ch
 
 ## Compare the sequences before and after cleaning
 
-🚀 Run Nanoplot again on the cleaned sequences.
+Run Nanoplot again on the cleaned sequences.
 
 
 <details>
   <summary> **Need help? (click)** </summary>      
+  
   
 ```{bash,eval=FALSE}
 
@@ -338,7 +396,7 @@ NanoPlot -t 8  --fastq cleaned_A1.fq.gz --plots dot  --no_supplementary --no_sta
 
 </details> 
 
-🔎 Open "after_filter_A1NanoPlot-report.html" on your local computer.
+Open "after_filter_A1NanoPlot-report.html" on your local computer.
 
 ```{bash,eval=FALSE}
 
@@ -358,68 +416,46 @@ cp /cluster/projects/nn9987k/BIO326-2025/day1/after_filter_A1NanoPlot-report.htm
 
 
 
-### **Discussion Point**
+### Discussion Point
 
-- 1. Did you see the difference of read and quality distribution between before and after the filtering? Discuss within/between groups.
-
-- 2. What species is this? (That should be Eukaryote)
-
-Hint 1 ⚠️ **Notice!** The first few thousand reads might be short/unreliable.
+Did you see the difference of read and quality distribution between before and after the filtering? Discuss within/between groups.
 
 
-<details>
-<summary> Hint 2 🔍 Try looking at the **2001st read** (click) </summary>
+## Core Activity: Quality Metrics Reporting
 
-```{bash,eval=FALSE}
-zcat cleaned_A1.fq.gz | tail -n +2001 | awk 'NR%4==2 && length($0) > 1000' | head -1
-
-```
-</details>
-
-<details>
-<summary> Result: the **2001st read** (click) </summary>
-
-```{bash,eval=FALSE}
-TGCCACTTACTTCGTTCAGTTACGTATTGCTAAGGTTAAACAGACGACTACAAACGGAATCGACAGCACCTTAGAGACAAGCAAAGGAGACAGAAACTGGATAGAAGGTCAAATCATTAAACCCTCAGTACCTACCACAAGTGGGTTTTTTGAACTTCACATCCACTTTCCTCACATGCCATAGCTGTGCTAATATCTCTTTTATACACAAGAAAAAAAAAAAAAAAACTTCCCACATATGTAATTTTTTTCTCCCAAAATTTCTAATATCATCATGGTCACAAAATGACTGCCTCATCCCCAAGAATCTTATCTATGCTCCAGATAGGCTTCACTGAATAGGAGAAGCCCTTCCCAGTTTCTGGGGAAAAGATATAAATTTATGTATTACCAATTATTACATATTAATAACTATTTAAGTTGTGGTTTTCAGAAAGCTAACTGGCACCAAATATCCAATTTACTCTCTGGTCATTTAGTAAGCCTTATAATCAGCTCTCTGGGTAGTTGCTCCCTGTCATTCAAGGAATAAAGGAATGTGTGCATGTGTGTTCAGTCATTGAGTCATGTCTGACTTTGTGACCCCATGGACTGTAGTTGCCAGACTCCTCTATCCATGTGGTTCTCCAGGCAAGAATACTAGAGCGGGGGGTGGTGGGGAGTGAGTGGGGAGTATGATCAGAGAGACTCTTCCACTTATGCAGAGGAAGAATATTCCAGCCTCAAATTCAAGATGGCGAGTTGTCTGAATCCTGGTAAGAATTGCTATACTCTTGGTTCCACCATAGGATTGATTAGTACGTCAAAAGCAAAAACAATAACACATTCCTATTTCTTAGAAAAAGTGACTGTGAAACACAGCAGATGTGCTAGATGCCAAATACTCCCCAACTCTGGCCAGATCAACAGACGTGACGCCTGTCCAAATGCAAAGACAGCATAGAATCACCCAAGACCAATAAAATAATCATGATAATATAGCTAGCACAGCCTTTGTGGCAGGTATTATCATAAGTTTTTCACATAAAATAACCCACTTAATTCCCCACAACAACCTTATATGGGAAGAACTATTATTGTCTCTATTTTAAAGAAGAAGGAACCAGGAACAGGGAAGTTAAGTAATTTTGCTCATGGTCAACAGCTTGAAATTAGCATTCTGTCCCGAGAGTCTATGATTTTACCTACTATGCTGACCTAAAAGCATATATTCCCACAAGAAATGTACAATCCTATTAGAAAAAAGTCCAAATAAAAGTTACAAGAATACTCACAGACAAGGTATTAGATTGAACAGAAAAATTAAGGACTTGTAAGTGACACACTATGTTAATAAAGAGAGAATTTTCAATATCTCTAATCATTAGGGAAATGCAAATCAAAACTATCATGAGGTGTCATCTCATACCAATCAGAATGGCCATCAGCAAAAACTCTACAACTAATAAATGCTGGAGAGGGTGTGAAGAGAAAGGAACCCTCCTACTCTGTTGCTGAGAATGTAAATTGGTGGCCAATATGAAAAACAATATGAATGTTCCTTAAAAAACTAAAACTAGAGCTACCATATGATCACAGTCACACTGCTTGGCATATGTCCAGCAACAACCCTAACTTGTAAAGATACATGTGGCCCAATGCTCATTGCAGCACTCTTGACAACAGCCAAGCCATGGAAGCAAACTAAATGTCCATTGACAGATGAATGGATAAAGAAGATGCAATATATTTATACAATAATATTACTCAACTATAAAAAAGAATTAAATAATGTCATTTGCAGCAACATGGTTGAACCTAGAGATTATCATACTGCTGCTGCTGCTGCTAAGTCACTTCAGTCGTTTCTGACTCTGCGACCCCATAGACTGAAGCCCACCAGGCTTCCCCGTCCCTGGGATTCTCCAGGCAAGAACACTGGAGTGGGTTGCCATTTCCTTCTCCAATGCATGAAAGTGAAAATTGAAAGTGAAGTCGCTCAGTCGTGTCCGACTCTTAGCGACCCCATGGACTACAGCCTACCAGGCTCCTCCATGCATGGGATTTTCCAGGCAAGAGTACTGGAGTGGGGTGCCATTGCCTTCTCTGGATTATCATACTAAATGAAGTCAAAAACAAATATATACTTCATTTATATGTAGGATCTAACAAATGATACAATTGAACTTATTGAACAAATAAATTCATAAACATAGAAAACATTCTCATGGTTACCAAAGGGTTAGGGGGGCTAGTGAGGGGTGGGGAGAGATAAATTAGAAGTTTGAGATTAAAACTTACATACCTTGGTAGCTCAGCTGGTAAAGAATCCACCTGCAATGCAGGAGACCCCAGTTCAATTACTGAGTGGGAAAGATCTCCTGGAGAAGGTATACGCTACCCACTCCAGCATTCTTGCCTGGAGAATCCCCATGGACAGAGGAGCCTGGGAGGCTACAGTCCATGGGGCCACAAAGAATGGAAAACAACTGAGTGACTAAGCACACAGCACGACTTTGTATCAAATAAGTAAGCAACAAGGGCCTACTGTATAGCACAGGGAACTATACTTAACATCTTTTAATAACAGAAAGTGAAGAAGAACTAAAGGGCCTCTTGATGAAAGTATGTGAAAGAGGAGAGTGGAAAAAGTTGGCTTAAAGCTCAACATTCAGAAAACAAAGATCATGGCATCCGGTCCCATCACTTCATGGCAAATAGATGGGGAAACAATGGAAACAGTGGCTGACTTTATTTTTCTGGACTCTAAAATCCTGCAGATGGTGATTTCAGCAATGAAATTAAAAGACGCTTACTCCTTGGAAGGAAAGTTATGACCAACCTAGACAGCATATTAAAAAGCAGAGACATTACTTTATCAACAAAGGTCTGTCTAGTCAAGGCTATAGTTTTTCCAGTGGTCATGTATGGATGTGAGAGTTGGACTGTGAAGAAAGCTGAGTGCAGAAGAATTGATGCTTTTGAACTGTGGTGCTGGAGAAGACTCTTGAGAGTCTGCTGGACTGCAAGGAGATCCAACTAGTCCATCCTAAAGGAGATCAGTCCTGGGTGTTCATTGAAAGGACTGATGATGAAGCTGAAACTCCAATACTTTGGCCACCTGATGTGGAGAGCTGACTCATTTGAAAAGACCCTGATGCTTGGAAAAATTGAGGGCAGGAGGAGAAGGGGATGACAGAAGATGAGATGGTTGGGTGACATCACCGACTCAATGGACATGGGTTTGGGTGGACTTCGGGAGTTGGTGATGGACAGGGAGGCCTGGTGTGCTGTGGTTCATGGGGTTGCAAAGAGTTGGACACGACTGAGCAACTAAACTGAATGGAAAAGAATATATACATGGTATTTATGGACTTTCTTGGTGGCTCAGATGATAAAGAATCTATCTGCAGTTCAGGAGACCCGGGTTCGATCCCTGGGTTGGGAAGATCCCCTGGAGAAGGAAATGGCTACCTACTCTAATATACGTATATAACTGAATCACTTTTCTGTACACTGAAGCTAACACAACACTGTAACTTATACTTCAATTAAAAATAAAAATGAAAAATAAAAGAGCATTTTAATCAGAGAACACCCTGATTCTCTTTGAATTAAACACAACGGATGAGACTACATCTCTCTCCTGTTGCTGTTATTGTTCTTGTTGTTTTGTTTGAAGTTTGTCTAGTAATTGATCCTTTCAATGAACTGTGCTTTAAAAGTATATGCTAAACTTCCTTTCAAAATTTATAAATTTTTGCTTTCACCTTTTTTGCTCCCTTTTGTTTTACATTAGAGATTTGTGATAATATGTCTTGAACCAATTGTAGCTGAAAGCCCTGAAGTTATGCTAAAGATTGGGGTTGATTGATAGATAGCAAGCTCAGTTCTCCCTGTGTGTCCAAGAGCTGGTCAACACAGTTATCCAGCTATTCTGGCAGGTAGCTCTCTGGTTTTATCCTGTTGGTTAAAGAAATGGCCTCACCAGTGCAGATAATCTAACAGGAATAGGAGGCTTCTAACAGCAGTATGGCCTTCCTGAGTGTGCACTGGCCAGAAGAGCATGCCTTCAGATACAATAACCAATTCACCTGGGTTTGCCCAAGACTTTCTCAAGCTTAGCTCTGAAAGTCCCACATTCCAAAAATCCCTCTTTCATGGGACAACAGAAAGAATTGGTCATCCTAGGCCCAGTGCTGTCTTTGACCTTGGGTGAGGCAGTCCAATGTTGAGGCAGGAAACAGAGGTTTCAGAAAAAGACATATCTCAACTCCACCTCTGCCACTTACAGTATAATCTGGGACAAGCCATTTAAACCGAGACACCATTTTCTTTATCTGTAATATAAGGATAACAGCCCTGTGACTTTTTGAGAATTTAATCAGAAGTCATGAAAGATTTCTAGAAAAGTGTCTGGCATAAAGTAGCTGCCCAGCAAATAGTAGGTGTTATTACTATATTCCAGGAATTCTAAAATCAAATAGCAACTATAAAAGCAATTATGTCTAGACAGGTGGTATTTTGGGTTTTTTTTTTTTTTTTTTTTGGTTTCTTTTTTCTTAAATGGGATTATCTATGACTATGGTTATTTCCATTTTTAAAAGTCAATTCATTTGATCGGATTGATTGGCCAAAAATTCATGTTGACTCGTGCTAACTGTTGTAAGATCAAGCACTTTCAAACTTATTCATAAATAACATCCAAGTCATCTTTTCTAAATATTTAAGTTAACAATATAATTGCCTGCTACCCACAGAAGCATCTTCCTTTCAGTAGAATTTTAGAAAGAGGTACACAGAAGAAATACAAAAATGTCTAATTTTCTCCTTTAAGCTATGATATTCTACACTAACCCAGGTTTTTATGTAACAAAGCTCTGGTTTATACTAAGTACATTCTTTAATATTAATTGAAAAGAACTAATTTATAATCTTATGCTTTAACTTCTTGAAACTGACTAATTCTTTTAAAAGGTTTCCTAGGATAAGATCCATTAAATTTTATGATTTTGATTTTTGTATTGATAGTAAATCATTTTTCACCAATGATTTCTTTTGGTGTTTTGTTTTCTCTCAATTCTGAATACAGTTTCTTATACTTGAATTTTTAATAACACAAATAGGATGTATTTTGATTAATTAACTTTAAAATACAATTTCTGATAATCTATCTTCTATAATATATAGATTTTAATTCATAAACTCAAGTATTGATGGAACAGTGGTGCACTAGAATCTATTTTATCTATTTAAGAAATCTTTTCCATTGAGTACAACATTTAATAAGAATTTTCAAACTTTATGCAATATTTTTACTTCATAATAAAAATATAATTTAAATAATTTTTATAAGATTATTTTCCTACCTTAAGAACAAATTTACATTTGAGCCCATAAAGTTTTCAGTTTATGACACTATACAATTCAAGCTAAGCAGTTAAAAGATTCTGAGAAGGAAACTCGAATTGCTCAGAGAAAGTGTGAAATCCCATGTATTACTAAAAACTCAAAGGACTGTCTTGATCAAAAATTTTCTGAATACGTGGCAGGTGGATAATTCATTTAAAAAATTCCCCACCCACATTGTTCTCTGAAGTGTGTCTCAAAGTCCCATTCCTTAGCATAAAAGACATCTTGGTTTCTTTTTCTCAACATGTGTTTTTTTTTTTTTTTTTTAGTCAAACATATAATATTCAGTCTTGGGACATTACAGGAAATGTGATTTAGATTCTTCTCATTACTGCAGCATAACACAGAGGCACACATAAAAAATCCCCTCTCTGTGCTGCCTATGTTCCTCTTACACATTAGGTTTCTTAATTTTTTATTGAAGTATATCATGTAAGTTTCAGGTCTACAGCACAGCAATTCAGTTATATATATATGTGTGTGCGTGTGTGTGTGTGTGTGTGTGTATACATATATATGTATATATACATTCTTTTCCTTTTCTTTTCTTTTCAGATTCTTTTCTCTTATCATTTCAGTTCAGTTCAGTCGCTCAGTCGTGTCCAACTCTTTCTGACCCCATGAATCACAGCACGCCAGGCCTCCCTGTCCATCACCAACTCCCAGAGATCACTCAAACTCACGTCCATCGAGTTAGTGATGCCATCCAGCCATCTCATCTTCTGTCGTCCCCTTCTCCTCCTGCCTCCAATCCCTCCCAGCATCAGAGTCTTTTCCAATGAGTCAACTCTTTGCATGAGGTGGCCAAAGTCTTCAACCAGTTTAGCATCAGTCCTTCCAAAGAACACACAGGGCTGATCTCCTGTAGAATGGACTGGTTAGATCTCCTTGCAGACCAAGGGACTCTCGAGAGTTTTCTCCAACACTACAGTTCAAAAGCATTAATTCTTCAGCGCTCAGCTTTCTTCACAGTCCAACTTTCACATCCATACATGACCACAGGAAAAACCATAGCCTTGACTAGACGGACCTCAGTTGGCAAAGTAATGTCTCTGCTTTTGAATATACTATCTAGGTTGGTCATAACTTTCCTTCCAAGGAGTAAGCGTCTTTTAATTTCATGGCTTCAGTCACCATCTGCAGTGATTTTGGAGCCCAAAAGAATAAAATCTGACACTGTTTCCACTGTTTCCCCATCTATTTCTAATGAAGTGATGGGACCAGATGCCATGATCTTTGTTTTCTGAATGTTGAGCTTTAAGCCAACTTTTTCACTCTCCTCTTTCACTTTCATCAAGAGGCTTTTTAAGTTCCTCTTCACTTTCTGCCATAAGGGTGGTGTCATCTGCATATCTGAGGTTATTGATATTTCTCCAGGCAATCTTGATTCCAGCTTGTGCCTCTTCCAGCCCAGCGTTTCTCATTATGTACTCTGCATATGTACTTTTCTCTTATCAGATCAGATAAGATCAGATCAGTCACTCAGTCGTGTCTGACTCTTTGCGACCCCATGAATCCCAGCACACCAGGCCTCCCTGTCCATCACCAACTCCCGGAGTTCACTCAAACTCACGCCCATCGAGTTCAGTGATGCCATCCAGCCATCTCATCCTCTGTCCTCCCCTTCTCCTCTTGCCCTCAATCCCTCCCACCATCAGAGTCTTTTCCAATGAGTCAACTCTTCACATGAAGGTGGCCAAGTCCTCTGTTTGAATCCATTTCCTCATTTCCTCCAAACCCACTTCCTGTCCTTCAAAATGGACTCATCATCTACTCACAGTCCAAGGGACTCTCAAGAGTCTTCTCCAACACCACAGTTCAAAAGCATCAATTCTTCAGTGCTCAGCCTTCTTCACAACTACGAGCCTCACTTTAGCTGAGTATACTTCCCTGTGCCATACAGTGGGTCCATGTTACTTACATATTTTATACGTAGTGGAGTATATAAATTAATCCCAGCCTCCTAATTTATCCCTCTCCCTCCCACCTTTCCCTTTGGTAAGTGTAAGTTTGTTTTCTGTGTCCATGAGTCTCTTTCAAACATCAGTTCTTTAAGTAAAATTCATGTCAATGTTTTAAGAAATAAAGGACTGTCTTTTCAATTATTTTTTATACATTTCATATAATATCTTATCTGTTCTCTGCTCCCAGATTTTTGATAACTCTAGGACCTCTGAGATGAGTCCTGACACATTCAGTGACCACATTAAGCATTTTCAGTCCAGAGCCCAGAAAGCTTGACTATGTTTCAAAATGGGTAGAAACATTTCTGAATAAAAGTCTTTTTATTCCTAATATGTTATACTTGTCAAAAGCACATTGGGTGCTCACTTCACCAGCACATATACTAAAATTGAAATGATCCAGAGATTAGCATGGCCCCTGTGCAAAGATGACACACAAATTTGTGAAGCATTCCTTATTTTTCTGTATGACTCAGGGAACTCAAACAGGGGCTCTGTATCAACCTAGAGGGTGAATTGGGGAGGGAGATGGGAGGAAGGTTCAAGAGGGAAGGGACATATGTATACCTATGGCTGATTCATGTTGAGGTTTGACAGAAAACATCAAAATTCTGTAAAGCAATTATCCTTCAACTGTAAAATAAATAAAATTTTAAAAGAAAGAAAAAGCACATTGGATCTGCCAGATAAGCAAATATTTACTAATCTAATTTGTTGCCAATGTTGCAAGCAGGTTACTTTACAAATAGCTGACTGGGAACTTCAGCGGCAATAGAAATTGCTAAAGTGACTTATTCACTCAAATGCTTTTAAACCATATTGTATTCTTGGATTCCAATAATAATTCCATCCACTCAATGGCAATTCTAGTGCAATCCCATCCACTCAATTGAACCAACCAAGAAAAACCAAATACATCTGAATGCCTAAGAATTCATCATAAATTGGTGGTTCAGTTTTGATCCTTAGAAGGAAAACTAAAATGAATACCACAGATTGCTCTAACTATTCTCCAGTACTTTAGAGATACAAAATACAGGATTTAAAACTTTCACTAAATCATATATGCACCACCCCCACTAAACAGAATTCTTTTACTGGAGGAACAAAATTACATGGGTATGTTTCTGAGAGCTCATGTTGAGACATTTCTTTCCATTATTTCCATACCTTTTTCTAAATTGCTGTTTATTGGCAAAATAAACTGAAAGTCATTATTATTCTTCCACCTGATTTGGATATGAAACTTGGCCTTACTCTTAGAGCTAGATAATTTAGCTCCAGAGTACTAAAAAAAAAAAAAAAGTCCACATTTTTCATCTAAAACTTGTTATGGTAGGTATAATGTTCCAGCTGATAGCCTGACCTGTTTTTAAAAATGGAAATTTTTCAAAAACCATGAAAGTACATGTTATTTTCTCTTTTTCATTGATCACTTTTCATTGAAATATTGTTTATTTTAGAGAACCTTGAAACTGGTTTATCATAGTAATAAAATGTCAACATTCTAGGTAGGTCAAATTTTGTCCACAACAAATGTAAGGTTTAAAAACTTAATTTGTAAGAATAAATATTGTTTTGCCTATTGAATAAAAACTAAAGAAAAATCATATCTGTAACTACAATGGAATATAACCAAATTGTTCAGAATGCCATTTTAGAAATTTGGTATCATTTTCTAAAATGAAAATACATTTACGTCATTTTCCCCATTTACTGTAAACCCAGTTTTCTAGTAGAATGGGGAAAAATACTTAAATTGTAAAACAAAACATTCCCAAATCACTGAAAAATTCTTCAGCTGTGAAATCAATGTGTGTTTTTGAGATTTGCTGTGAAATTTTCAGCTAAACTTCATCTTTGTAAGTGAAAGCTAAAAGCTTCTTCACTGTTTCCATATAAGTAATGGCTTATTTGACCGGCATTTTTTTTTCTTTAAAAAAAATTCTTTCCCTACTAACCTTTCCTCTAAATGCAAAGAAATATAATCTCCTTGATTCTAAGTACTTTGCAAACCCTGTAAAAATTTAAAACTATGAGGTGCTGTCGATTCCGTTTGTAGTCGTCTGTTTAACCTTAGCAATACAT
-```
-</details>
-
-
-<details>
-<summary> Hint 3 (click) </summary>
-🧬 Run a [**nucleotide BLAST search**](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome) to search the sequence against a public genetic database.
-</details>
-
-<details>
-<summary>Hint 4 (click)</summary>
-🐄 **Many hits are from ...what species...? And one species looks obviously different! What is it?? **  
-</details>
-
-<details>
-<summary>Result</summary>
+> **Your mission**
+>
+> After running NanoPlot on your dataset (before and after trimming), extract the following summary statistics and enter them into [the shared spreadsheet](https://docs.google.com/spreadsheets/d/1VvkG2FId57kSaE9hbZ7QUlzNcrFbAd9GI68F0T_QA5I/edit?gid=0#gid=0):
+>
+> - Total reads  
+> - Total bases  
+> - Read N50  
+> - Mean read quality  
+>
+> Record these values for both:
+>
+> - **Before trimming**
+> - **After trimming**
+>
+> Use the NanoPlot summary report (.html or .txt) to retrieve the metrics.  
+> Ensure that you enter values corresponding to your assigned sample and treatment.
+>
+> The purpose of this activity is to compare sequencing yield and quality before and after filtering across treatments.
 
 
 
-![](images/blast.png){width=80%}
-
-</details>
+# Part B. Mapping to the reference genome (Advanced)
 
 
+For the following sections, we will use a pre-processed and reduced dataset derived from previous sequencing runs.  
+Full mapping and variant calling workflows on the complete raw datasets are computationally intensive and may require substantial runtime on the HPC infrastructure.  
+To ensure that all students can complete the analytical steps within the practical session, selected BAM and VCF files have been prepared in advance and restricted to defined genomic regions.
 
-
-
-## **Your mission**
-
-Do the quality check and filtering, and compare the read length and quality between the four experimental conditions you have conducted!!
-
-
-# Part B. Mapping to the reference genome (perhaps optional)
 
 ![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/BIO326-genome/Slide14.png){width=90%}
 ### What is Read Mapping?  
 - Aligning sequencing reads to a reference genome.  
 - Essential for variant detection to find out which region is different from your sample and standard sample.  
-
 
 
 
@@ -583,7 +619,7 @@ grep -v '^##' control.vcf |  sed -n ${RANDOMVAR}p
 
 
 
-# Part C. Estimate the effect of variants 
+# Part C. Estimate the effect of variants (Advanced)
 
 ## Overview
 

@@ -398,15 +398,6 @@ NanoPlot -t 8  --fastq cleaned_A1.fq.gz --plots dot  --no_supplementary --no_sta
 
 Open "after_filter_A1NanoPlot-report.html" on your local computer.
 
-```{bash,eval=FALSE}
-
-# taking too long?
-qlogin 
-
-cp /cluster/projects/nn9987k/BIO326-2025/day1/after_filter_A1NanoPlot-report.html after_filter_A1NanoPlot-report.html
-
-```
-
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image6.png){width=80%}
 
@@ -444,12 +435,18 @@ Did you see the difference of read and quality distribution between before and a
 
 
 
-# Part B. Mapping to the reference genome (Advanced)
+# Part B. Mapping to the reference genome 
 
 
-For the following sections, we will use a pre-processed and reduced dataset derived from previous sequencing runs.  
-Full mapping and variant calling workflows on the complete raw datasets are computationally intensive and may require substantial runtime on the HPC infrastructure.  
-To ensure that all students can complete the analytical steps within the practical session, selected BAM and VCF files have been prepared in advance and restricted to defined genomic regions.
+### Objective
+
+To understand the core logic of read mapping and structural variant calling by running (or inspecting) a minimal long-read pipeline:
+1) map reads to a reference genome,  
+2) generate a sorted/indexed BAM file,  
+3) call structural variants (SVs) into a VCF file,  
+4) inspect variant records and interpret key fields (SVTYPE, SVLEN, GT).
+
+
 
 
 ![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/BIO326-genome/Slide14.png){width=90%}
@@ -459,7 +456,7 @@ To ensure that all students can complete the analytical steps within the practic
 
 
 
-## run Minimap and map the reads to the reference genome
+## Run Minimap and map the reads to the reference genome
 
 
 ```{bash,eval=FALSE}
@@ -500,38 +497,24 @@ sniffles --input  control.bam --vcf control.vcf
 
 
 
-## The Sniffles Variant Calling Script
+</details> <details> <summary><strong>What each step is doing (click)</strong></summary>
 
-| **Command** | **Explanation** |
-|------------|----------------|
-| `#!/bin/bash` | Declares that this script should be executed using the Bash shell. |
-| `#SBATCH --job-name=Sniffles` | Names the job "Sniffles" in the SLURM job scheduler. |
-| `#SBATCH --mem=12G` | Allocates 12GB of memory for the job. |
-| `#SBATCH --ntasks=1` | Requests 1 task (single execution unit). |
-| `#SBATCH --cpus-per-task=8` | Allocates 8 CPU cores for the task. |
-| `#SBATCH --output=mapping` | Specifies the output log file name as `mapping`. |
-| `#SBATCH --account=nn9987k` | Uses project account `nn9987k` for resource allocation. |
-| `#SBATCH --time=20:00` | Sets a time limit of 20 minutes for the job. |
+minimap2 ... > control.sam
+Maps long reads to the reference genome and writes alignments in SAM format.
 
----
+samtools view ... > control_temp.bam
+Converts SAM to BAM (compressed binary alignment).
 
-| `module load StdEnv` | Loads the standard environment modules. |
-| `module load Miniconda3/23.10.0-1` | Loads the Miniconda module (version `23.10.0-1`). |
-| `source ${EBROOTMINICONDA3}/bin/activate` | Activates the Miniconda environment. |
-| `echo "Working with this $CONDA_PREFIX environment ..."` | Prints the active Conda environment to verify it is correctly set. |
+samtools sort ... -o control.bam
+Sorts alignments by coordinate, required for efficient viewing and downstream tools.
 
----
+samtools index ... control.bam
+Creates an index file enabling random access to regions.
 
-| `minimap2 -t 8 -a cleaned_control.fastq.gz > control.sam` | Uses **Minimap2** to map the cleaned reads (`cleaned_control.fastq.gz`) to the **Bos taurus** reference genome (`.fa.gz`) and saves the output as a **SAM file (`control.sam`)**. |
-| `samtools view -S -b control.sam > control_temp.bam` | Converts the **SAM file** to a **BAM file (`control_temp.bam`)**, which is a compressed binary format. |
-| `samtools sort control_temp.bam -o control.bam` | Sorts the BAM file and outputs a final sorted version as `control.bam`. |
-| `samtools index -M control.bam` | Indexes the BAM file so that it can be queried efficiently. |
+sniffles ... --vcf control.vcf
+Calls structural variants from the read alignments and outputs VCF.
 
----
-
-| `sniffles --input control.bam --vcf control.vcf` | Uses **Sniffles** to identify structural variants in the **control BAM file** and outputs them in **VCF format (`control.vcf`)**. |
-
----
+</details>
 
 
 
@@ -546,7 +529,6 @@ Note: Mapping and variant calling is time consuming, but you can find the output
 Now you got the variant file!
 
 ## Investigate the variants
-
 
 
 Copy the vcf in your directory
@@ -619,13 +601,13 @@ grep -v '^##' control.vcf |  sed -n ${RANDOMVAR}p
 
 
 
-# Part C. Estimate the effect of variants (Advanced)
+# Part C. Estimate the effect of variants (Local)
 
 ## Overview
 
 In this practical, you will explore high-confidence structural variants (SVs) detected from long-read sequencing data in two samples (2024 and 2025).  
 
-The dataset has been reduced to chromosome 13 around selected SVs to ensure fast loading in IGV.
+The dataset has been reduced to chromosome 13 around selected SVs to ensure fast loading in Integrative Genome Viewer(IGV).
 
 You will:
 - Visualize structural variants in IGV  
@@ -633,11 +615,9 @@ You will:
 - Interpret read-level evidence  
 - Examine gene overlap  
 - Investigate biological function  
-- Produce a short structured report  
-
+- (Optional) Produce a short structured report  
 
 ---
-
 
 
 
@@ -670,6 +650,12 @@ Variant file
 Gene annotation
 - `Bos_taurus_chr13.gtf.gz`  
 - `Bos_taurus_chr13.gtf.gz.tbi`  
+
+
+---
+
+
+</details> <details> <summary><strong>File Formats Explained (click)</strong></summary>
 
 
 ## File Formats Explained
@@ -812,7 +798,8 @@ Columns:
 
 Used in IGV to display gene models.
 
----
+
+</details>
 
 
 
@@ -865,6 +852,10 @@ Choose a locus you like and investigate it in IGV.
 
 
 
+# For your report assignment (optional)
+
+Select one structural variant locus from the table provided and investigate it in IGV.
+Report the genomic coordinates, variant type and size, genotype comparison between the 2024 and 2025 samples, whether the variant overlaps any genes, and briefly discuss the potential functional consequence for the affected gene.
 
 ## Example views 
 
@@ -875,13 +866,13 @@ Choose a locus you like and investigate it in IGV.
 
 ![](images/image_2026_2.png){width=80%}
 
-In 2024, reads align cleanly across this site. There is no consistent interruption in the alignment. Coverage is even, and reads match the reference sequence. This suggests no insertion at this position.
+This locus corresponds to a 51 bp insertion at position 46,710,350 on chromosome 13. 
 
-In 2025, multiple reads show an insertion at the same coordinate (46,710,350). IGV explicitly labels the inserted sequence. The reads split at that position, and the inserted bases are present in several independent reads. Because the signal is consistent across reads, this supports a true insertion rather than a sequencing artifact.
+In IGV, the 2024 sample shows continuous read alignment across the site with no consistent breakpoint or inserted sequence, indicating a reference genotype at this position. 
 
-The key observation is:
-2024 = continuous alignment.
-2025 = same insertion in multiple reads at the same site.
+In contrast, the 2025 sample displays multiple independent reads containing the same inserted sequence at the identical coordinate, with split alignment patterns and clear insertion labeling in IGV, supporting the presence of the insertion allele. 
+
+According to the gene annotation track, the variant lies within the ENSBTAG00000006531 locus, corresponding to DIP2C. If located within an exon, a 51 bp insertion could alter the coding sequence while preserving the reading frame, potentially modifying protein structure. 
 
 
 
@@ -891,18 +882,20 @@ The key observation is:
 
 ![](images/image_2026_3.png){width=80%}
 
+
+Sniffles2.BND.2F6MC — chr13:75,795,925–75,795,926 — BND — ENSBTAG00000013114
+
 At this locus, compare the two samples directly.
 
 
-In 2024, the reads are evenly distributed across the region. Mismatches are scattered and coverage is relatively uniform. There is no obvious clustering of soft clipping, no large gaps, and no abnormal pile-up. This pattern is consistent with the reference sequence and does not suggest a structural variant here.
+In the 2024 sample, read coverage is uniform, mismatches are scattered, and there is no clustering of discordant alignments, indicating absence of a structural rearrangement. 
 
-
-
-In 2025, focus on the central region where the reads form a dense, colorful block. The vertical colored lines indicate many mismatches concentrated in the same short interval. Coverage is locally elevated, and multiple reads show discordant alignment in the same position. When many reads change relative to the reference at the exact same coordinates, this is not random sequencing error. It is evidence of a real sequence difference.
-
+In 2025, focus on the central region where the reads form a dense, colorful block. The vertical colored lines indicate many mismatches concentrated in the same short interval. Coverage is locally elevated, and multiple reads show discordant alignment in the same position. When many reads change relative to the reference at the exact same coordinates, this is not random sequencing error. 
 
 
 This pattern is typical of an inversion or a highly divergent sequence present in 2025 but absent in 2024. The key points to examine are therefore: uniform vs. clustered signal, normal vs. elevated coverage, and isolated mismatches vs. consistent changes across many reads.
+
+The locus overlaps ENSBTAG00000013114. A breakend event within a gene may disrupt coding sequence continuity or regulatory structure, depending on whether the breakpoint falls within an exon or intron.
 
 
 

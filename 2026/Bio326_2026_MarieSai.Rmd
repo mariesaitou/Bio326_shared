@@ -852,7 +852,7 @@ Choose a locus you like and investigate it in IGV.
 
 
 
-# For your report assignment (optional)
+## For your report assignment (optional)
 
 Select one structural variant locus from the table provided and investigate it in IGV.
 Report the genomic coordinates, variant type and size, genotype comparison between the 2024 and 2025 samples, whether the variant overlaps any genes, and briefly discuss the potential functional consequence for the affected gene.

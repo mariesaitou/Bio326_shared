@@ -256,7 +256,16 @@ Nanoplot will generate the result files, named "before_filter_A1"xxx. Lets look 
 ```{bash,eval=FALSE}
 
 # taking too long?
-qlogin 
+srun \
+--account=nn9987k \
+--partition=normal \
+--gres=localscratch:10G \
+--cpus-per-task 4 \
+--nodes 1 \
+--mem=10G \
+--time=02:00:00 \
+--pty bash \
+-i
 
 cp /cluster/projects/nn9987k/BIO326-2025/day1/before_filter_A1NanoPlot-report.html  before_filter_A1NanoPlot-report.html
 

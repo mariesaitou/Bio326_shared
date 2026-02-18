@@ -38,17 +38,17 @@ This practical supports the course Learning Outcomes as follows:
 
 
 
-![](https://github.com/mariesaitou/Bio326_shared/raw/main/2024/images/Overview_2026_bio326.png){width=80%}
+![](https://github.com/mariesaitou/Bio326_shared/raw/main/2026/images/Overview_2026_bio326.png){width=80%}
 
 ### Data usage and analytical structure
 
-Part A is conducted using the sequencing data generated from your own wet lab experiment.  
+**Part A** is conducted using the sequencing data generated from your own wet lab experiment.  
 The objective is to directly compare how different physical DNA treatments (Control, Vortex, Needle, Temperature stress) influence sequencing performance metrics, including read length distribution, sequencing yield, and base quality before and after filtering.  
 This section establishes the causal link between laboratory manipulation and sequencing outcomes.
 
 
 
-Parts B and C extend the analysis to mapping, structural variant detection, and biological interpretation.  
+**Parts B and C** extend the analysis to mapping, structural variant detection, and biological interpretation.  
 Because full mapping and variant calling workflows on complete raw datasets are computationally intensive and require extended runtime on HPC infrastructure, a pre-processed and region-restricted dataset derived from previous sequencing runs is used for these sections.  
 
 
@@ -58,6 +58,12 @@ This ensures that all students can complete the advanced analytical workflow wit
 Together, Part A and Parts B–C form a coherent analytical progression:  
 from experimental manipulation and quality assessment (wet-to-sequencing outcomes) to genomic localization and biological interpretation (sequencing-to-function).
 
+
+# Review basic command usages
+
+
+[WorkingWithSigma](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/HPC-101-WorkingWithSigma2.md)
+[File transfer between Sigma2 and your computer](https://training.pages.sigma2.no/tutorials/hpc-intro/episodes/15-transferring-files.html)
 
 
 # Part A. Read quality check (Core Activity)
@@ -87,7 +93,7 @@ Samples were normalized to equal DNA mass per barcode, barcoded individually, po
 ## Connect to Sigma2 and the prepare the tools
 
 
-🚀In the Terminal/Command prompt, go to Sigma2 and your directory there.
+In the Terminal/Command prompt, go to Sigma2 and your directory there.
 
 [Let's review how to do so](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/HPC-101-WorkingWithSigma2.md)
 
@@ -170,7 +176,6 @@ You can calculate reads with:
 The total number of reads reflects **sequencing yield.**
 This will later be compared between treatments and after filtering.
 
-
 ---
 
 
@@ -195,10 +200,6 @@ zcat YourSample.fq.gz | awk 'NR%4==2 && length($0) > 10000 {print; exit}'
 
 Long reads are a key advantage of Nanopore sequencing.
 Read length distribution will later be compared across treatments.
-
-
-
-
 
 
 
@@ -485,8 +486,9 @@ source ${EBROOTMINICONDA3}/bin/activate
 
 echo "Working with this $CONDA_PREFIX environment ..."
 
+conda activate /cluster/projects/nn9987k/.share/conda_environments/EUK_DRY
 
-minimap2 -t 8 -a /cluster/projects/nn9987k/BIO326-2025/Bos_taurus.ARS-UCD1.3.dna.toplevel.fa.gz  /cluster/projects/nn9987k/BIO326-2025/day2/cleaned_control.fastq.gz > control.sam
+minimap2 -t 8 -ax map-ont /cluster/projects/nn9987k/BIO326-2025/day2/Bos_taurus_chr13.fa  /cluster/projects/nn9987k/BIO326-2025/day2/cleaned_control.fastq.gz > control.sam
 
 
 # convert the sam file to bam format

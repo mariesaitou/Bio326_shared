@@ -19,7 +19,7 @@ This R Markdown document provides the analytical workflow required to process an
 
 The structure, format, and assessment criteria of the written report and oral presentation are defined in the official course guides. This document focuses on the analytical components that generate the data and figures used in those assessments.
 
----
+
 
 ## Learning objectives and course alignment
 
@@ -36,12 +36,11 @@ This practical supports the course Learning Outcomes as follows:
 
 
 
-
-
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2026/images/Overview_2026_bio326.png){width=80%}
 
 ### Data usage and analytical structure
 
+<div style="background-color: #e6f2ff; padding: 10px; border-radius: 5px;">
 **Part A** is conducted using the sequencing data generated from your own wet lab experiment.  
 The objective is to directly compare how different physical DNA treatments (Control, Vortex, Needle, Temperature stress) influence sequencing performance metrics, including read length distribution, sequencing yield, and base quality before and after filtering.  
 This section establishes the causal link between laboratory manipulation and sequencing outcomes.
@@ -55,14 +54,32 @@ Because full mapping and variant calling workflows on complete raw datasets are 
 
 This ensures that all students can complete the advanced analytical workflow within the allocated practical session while working with high-quality, reproducible example data suitable for interpretation in IGV and downstream biological analysis.
 
-Together, Part A and Parts B–C form a coherent analytical progression:  
-from experimental manipulation and quality assessment (wet-to-sequencing outcomes) to genomic localization and biological interpretation (sequencing-to-function).
+**Together, Part A and Parts B–C form an analytical progression:  
+from experimental manipulation and quality assessment (wet-to-sequencing outcomes) to genomic localization and biological interpretation (sequencing-to-function).**
+
+</div>
 
 
-# Review basic command usages
+## For your report assignment
+
+(1) Part A
+Using the read quality values before and after filtering in the shared table (in Part A)
+Examine the effect of different DNA treatment methods on read quality and length.
+
+
+(2) Part C
+Select one structural variant locus from the table provided (in Part C) and investigate it in IGV.
+Report the genomic coordinates, variant type and size, genotype comparison between the 2024 and 2025 samples, whether the variant overlaps any genes, and briefly discuss the potential functional consequence for the affected gene.
+
+
+
+### Review basic command usages
+
 
 
 [WorkingWithSigma](https://github.com/TheMEMOLab/Bio326-NMBU/blob/main/Doc/HPC-101-WorkingWithSigma2.md)
+
+
 [File transfer between Sigma2 and your computer](https://training.pages.sigma2.no/tutorials/hpc-intro/episodes/15-transferring-files.html)
 
 
@@ -71,7 +88,10 @@ from experimental manipulation and quality assessment (wet-to-sequencing outcome
 ## Overview
 ### Objective
 
+<div style="background-color: #e6f2ff; padding: 10px; border-radius: 5px;">
 To quantitatively evaluate how different physical DNA treatments (Control, Vortex, Needle shearing, and Temperature extreme) influence long-read sequencing performance by comparing read length distribution, sequencing yield, and base quality metrics before and after quality filtering.
+</div>
+
 
 ### Experimental origin of the sequencing data
 
@@ -88,9 +108,7 @@ Samples were normalized to equal DNA mass per barcode, barcoded individually, po
 
 
 
-
-
-## Connect to Sigma2 and the prepare the tools
+## Connect to Sigma2 and prepare the tools
 
 
 In the Terminal/Command prompt, go to Sigma2 and your directory there.
@@ -104,7 +122,7 @@ ssh yourID@saga.sigma2.no
 ```
 
 
-Let's make a directory for analysis and enter in it.
+Let's make a directory for analysis and enter it.
 
 ```{bash,eval=FALSE}
 mkdir analysis # make directory "analysis"
@@ -132,7 +150,24 @@ You can find the complete overview of samples and barcodes in [the shared spread
 
 Confirm that the FASTQ file you are working with matches your assigned barcode and treatment condition before running NanoPlot.
 
----
+
+
+
+
+<div style="background-color: #e6f2ff; padding: 10px; border-radius: 5px;">
+All the data is now here:
+ 
+/cluster/projects/nn9987k/BIO326-2025/data_euk_2026/merged_fastq
+ 
+Concatenated fastq files are named according to barcode NB:
+ 
+NB01.fq.gz  NB03.fq.gz  NB05.fq.gz  NB07.fq.gz  NB09.fq.gz  NB11.fq.gz  NB13.fq.gz  NB15.fq.gz  NB17.fq.gz  NB19.fq.gz
+NB02.fq.gz  NB04.fq.gz  NB06.fq.gz  NB08.fq.gz  NB10.fq.gz  NB12.fq.gz  NB14.fq.gz  NB16.fq.gz  NB18.fq.gz  NB20.fq.gz
+</div>
+
+
+
+
 
 ## Explore the structure of a FASTQ file
 
@@ -156,9 +191,9 @@ FASTQ files contain both nucleotide sequences and per-base [quality scores](http
 
 - by [Illumina Knowledge](https://knowledge.illumina.com/software/general/software-general-reference_material-list/000002211)
 
----
 
-###  Count total lines and calculate number of reads
+
+### Count total lines and calculate number of reads
 
 ```{bash, eval=FALSE}
 zcat YourSample.fq.gz | wc -l
@@ -167,7 +202,7 @@ zcat YourSample.fq.gz | wc -l
 
 FASTQ uses 4 lines per read.
 
-You can calculate reads with:
+You can calculate the number of reads with:
 
     LINES=$(zcat YourSample.fq.gz | wc -l)
     echo $((LINES / 4))
@@ -176,7 +211,6 @@ You can calculate reads with:
 The total number of reads reflects **sequencing yield.**
 This will later be compared between treatments and after filtering.
 
----
 
 
 ### Compare quality positions
@@ -189,7 +223,6 @@ zcat YourSample.fq.gz | sed -n 4p | cut -c 21-25
 Quality scores are encoded using Phred+33.
 Quality may vary along the read due to sequencing chemistry.
 
----
 
 
 ### Extract one read longer than 10 kb
@@ -206,7 +239,7 @@ Read length distribution will later be compared across treatments.
 
 ## Quality check by Nanoplot
 
-The original fastq files may contain low quality reads. In this step, we will use "Nanoplot" to see the quality and lentgh of each read.
+The original fastq files may contain low quality reads. In this step, we will use "Nanoplot" to see the quality and length of each read.
 
 
 Make a slurm script to conduct the quality check on the sample file like below and run it. 
@@ -249,14 +282,13 @@ NanoPlot -t 8  --fastq /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz --pl
 
 
 
-Nanoplot will generate the result files, named "before_filter_A1"xxx. Lets look into them... 
+Nanoplot will generate the result files, named "before_filter_A1"xxx. Let's look into them... 
 
-[Review: File transfer between Sigma2 and your computer](https://training.pages.sigma2.no/tutorials/hpc-intro/episodes/15-transferring-files.html)
 
 
 ```{bash,eval=FALSE}
 
-# taking too long?
+# Taking too long?
 srun \
 --account=nn9987k \
 --partition=normal \
@@ -272,7 +304,16 @@ cp /cluster/projects/nn9987k/BIO326-2025/day1/before_filter_A1NanoPlot-report.ht
 
 ```
 
-🔎 Open "before_filter_A1NanoPlot-report.html" on your local computer. Then you will see something like below:
+Open "before_filter_A1NanoPlot-report.html" **on your local computer**. 
+[Review: File transfer between Sigma2 and your computer](https://training.pages.sigma2.no/tutorials/hpc-intro/episodes/15-transferring-files.html)
+
+
+
+
+
+<details>
+<summary><strong>Then you will see something like below:
+(click)</strong></summary>
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image3.PNG){width=80%}
@@ -283,8 +324,6 @@ cp /cluster/projects/nn9987k/BIO326-2025/day1/before_filter_A1NanoPlot-report.ht
 
 
 
-<details>
-<summary><strong>How to interpret these metrics</strong></summary>
 
 - Compare mean vs median read length. A large difference suggests a skewed distribution with a long tail of very long reads.  
 - N50 reflects the read length at which 50% of the total bases are contained in reads of that length or longer.  
@@ -299,6 +338,11 @@ Together, these metrics capture the trade-off between yield and quality before a
 
 
 ## Filtering by Nanofilt
+
+
+Now you will filter the obtained reads by length and read quality.
+
+
 ```{bash,eval=FALSE}
 
 #!/bin/bash
@@ -327,27 +371,37 @@ gunzip -c /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | NanoFilt -q 12 
 ```
 
 
+
+
+
+
+<details>
+<summary><strong>Parameters and Conda explained(click)</strong></summary>
 This script activates a Conda environment (Your toolkit that Arturo pre-assembled) on a computing cluster:
 
-1. Load required modules
 
-module load StdEnv → Loads the standard environment.
+This script activates a Conda environment on a computing cluster.
 
-module load Miniconda3/23.10.0-1 → Loads Miniconda, a lightweight Conda
-distribution.
+- `module load StdEnv`  
+  Loads the standard software environment.
 
-2. Activate Conda
+- `module load Miniconda3/23.10.0-1`  
+  Loads Miniconda, a lightweight Conda distribution.
 
-source ${EBROOTMINICONDA3}/bin/activate → Activates Miniconda.
+- `source ${EBROOTMINICONDA3}/bin/activate`  
+  Activates the base Miniconda installation.
 
-conda activate EUK_DRY → Activates a specific Conda environment for the project.
+- `conda activate EUK_DRY`  
+  Activates the project-specific Conda environment.
 
-3.  Confirm activation
+- `echo "Working with this $CONDA_PREFIX environment ..."`  
+  Prints the path of the currently active Conda environment.
 
-echo "Working with this $CONDA_PREFIX environment ..." → Indicates the currently active Conda environment.
 
 
-**Parameters**
+| Q Score < 12 | error rate cutoff |
+| Length < 1000 bp | read length cutoff |
+
 
 -l,  Filter on a minimum read length
 
@@ -355,19 +409,19 @@ echo "Working with this $CONDA_PREFIX environment ..." → Indicates the current
 
 In this case, we are removing reads lower than quality score 12 and shorter than 1000 bases.
 
+</details>
+
+
 If you are ambitious, please adjust the filtering parameters and see how they change the result.
 
 **(In that case, do not forget to name the result files differently.)**
 
 
-| Q Score < 12 | High error rate |
-| Length < 1000bp | Too short for meaningful mapping |
-
 
 
 ## Compare the sequences before and after cleaning
 
-Run Nanoplot again on the cleaned sequences.
+Run Nanoplot again on the cleaned sequences, and compare the quality metrics before and after the filtering.
 
 
 <details>
@@ -406,7 +460,7 @@ NanoPlot -t 8  --fastq cleaned_A1.fq.gz --plots dot  --no_supplementary --no_sta
 
 </details> 
 
-Open "after_filter_A1NanoPlot-report.html" on your local computer.
+Open "after_filter_A1NanoPlot-report.html" **on your local computer.**
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image6.png){width=80%}
@@ -424,31 +478,41 @@ Did you see the difference of read and quality distribution between before and a
 
 ## Core Activity: Quality Metrics Reporting
 
-> **Your mission**
->
-> After running NanoPlot on your dataset (before and after trimming), extract the following summary statistics and enter them into [the shared spreadsheet](https://docs.google.com/spreadsheets/d/1VvkG2FId57kSaE9hbZ7QUlzNcrFbAd9GI68F0T_QA5I/edit?gid=0#gid=0):
->
-> - Total reads  
-> - Total bases  
-> - Read N50  
-> - Mean read quality  
->
-> Record these values for both:
->
-> - **Before trimming**
-> - **After trimming**
->
-> Use the NanoPlot summary report (.html or .txt) to retrieve the metrics.  
-> Ensure that you enter values corresponding to your assigned sample and treatment.
->
-> The purpose of this activity is to compare sequencing yield and quality before and after filtering across treatments.
+<div style="background-color: #e6f2ff; padding: 10px; border-radius: 5px;">
+
+ **Your mission**
+
+</div>
+
+ After running NanoPlot on your dataset (before and after filtering), extract the following summary statistics and enter them into [**the shared spreadsheet**](https://docs.google.com/spreadsheets/d/1VvkG2FId57kSaE9hbZ7QUlzNcrFbAd9GI68F0T_QA5I/edit?gid=0#gid=0):
+
+ - Total reads  
+ - Total bases  
+ - Read N50  
+ - Mean read quality  
+
+ Record these values for both:
+
+ - **Before filtering**
+ - **After filtering**
+
+ Use the NanoPlot summary report (.html or .txt) to retrieve the metrics.  
+ Ensure that you enter values corresponding to your assigned sample and treatment.
+
+ The purpose of this activity is to compare sequencing yield and quality before and after filtering across treatments.
+ 
+
 
 
 
 # Part B. Mapping to the reference genome 
 
 
-### Objective
+## Objective
+
+
+
+<div style="background-color: #e6f2ff; padding: 10px; border-radius: 5px;">
 
 To understand the core logic of read mapping and structural variant calling by running (or inspecting) a minimal long-read pipeline:
 1) map reads to a reference genome,  
@@ -456,10 +520,10 @@ To understand the core logic of read mapping and structural variant calling by r
 3) call structural variants (SVs) into a VCF file,  
 4) inspect variant records and interpret key fields (SVTYPE, SVLEN, GT).
 
-
-
+</div>
 
 ![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/BIO326-genome/Slide14.png){width=90%}
+
 ### What is Read Mapping?  
 - Aligning sequencing reads to a reference genome.  
 - Essential for variant detection to find out which region is different from your sample and standard sample.  
@@ -488,42 +552,38 @@ echo "Working with this $CONDA_PREFIX environment ..."
 
 conda activate /cluster/projects/nn9987k/.share/conda_environments/EUK_DRY
 
-minimap2 -t 8 -ax map-ont /cluster/projects/nn9987k/BIO326-2025/day2/Bos_taurus_chr13.fa  /cluster/projects/nn9987k/BIO326-2025/day2/cleaned_control.fastq.gz > control.sam
+minimap2 -t 8 -ax map-ont /cluster/projects/nn9987k/BIO326-2025/day2/Bos_taurus_chr13.fa  /cluster/projects/nn9987k/BIO326-2025/day2/2025_chr13_teaching_20kb.fastq.gz > 2025_chr13.sam
 
 
 # convert the sam file to bam format
-samtools view -S -b control.sam > control_temp.bam
+samtools view -S -b 2025_chr13.sam > 2025_chr13_temp.bam
 
 ## sort the bam file
-samtools sort control_temp.bam -o control.bam
+samtools sort 2025_chr13_temp.bam -o 2025_chr13.bam
 
 # index the bam file
-samtools index -M  control.bam
+samtools index -M  2025_chr13.bam
 
 # Variant Calling using Sniffles
-sniffles --input  control.bam --vcf control.vcf
+sniffles --input  2025_chr13.bam --vcf 2025_chr13.vcf
 
 
 ```
 
 
 
-</details> <details> <summary><strong>What each step is doing (click)</strong></summary>
+<details> 
+<summary><strong>What each step is doing (click)</strong></summary>
 
-minimap2 ... > control.sam
-Maps long reads to the reference genome and writes alignments in SAM format.
+Workflow Overview
 
-samtools view ... > control_temp.bam
-Converts SAM to BAM (compressed binary alignment).
-
-samtools sort ... -o control.bam
-Sorts alignments by coordinate, required for efficient viewing and downstream tools.
-
-samtools index ... control.bam
-Creates an index file enabling random access to regions.
-
-sniffles ... --vcf control.vcf
-Calls structural variants from the read alignments and outputs VCF.
+| Command | Purpose |
+|----------|----------|
+| `minimap2 ... > 2025_chr13.sam` | Maps long reads to the reference genome and outputs SAM format. |
+| `samtools view ... > 2025_chr13_temp.bam` | Converts SAM to compressed BAM format. |
+| `samtools sort ... -o 2025_chr13.bam` | Sorts alignments by coordinate for downstream compatibility. |
+| `samtools index ... 2025_chr13.bam` | Creates BAM index for random genomic access. |
+| `sniffles ... --vcf 2025_chr13.vcf` | Detects structural variants and outputs VCF file. |
 
 </details>
 
@@ -534,7 +594,7 @@ Calls structural variants from the read alignments and outputs VCF.
 - Important for studying mutations and genetic variation.  
 [bam and sam format](https://labs.epi2me.io/reviewing-bam/)
 
-Note: Mapping and variant calling is time consuming, but you can find the output file here: /cluster/projects/nn9987k/BIO326-2025/day2/control.vcf
+Note: Mapping and variant calling is time consuming, but you can find the output file here: /cluster/projects/nn9987k/BIO326-2025/day2/2025_chr13.vcf
 
 
 Now you got the variant file!
@@ -547,7 +607,7 @@ Copy the vcf in your directory
 ```{bash,eval=FALSE}
 qlogin 
 
-cp /cluster/projects/nn9987k/BIO326-2025/day2/control.vcf  control.vcf 
+cp /cluster/projects/nn9987k/BIO326-2025/day2/2025_chr13.vcf  2025_chr13.vcf 
 
 
 ```
@@ -557,62 +617,71 @@ Look inside the vcf
 ```{bash,eval=FALSE}
 # INFO field
 
-grep '^##' control.vcf | tail -n 20
-
-# variants
-grep -v '^##' control.vcf | more
-
-
+grep '^##' 2025_chr13.vcf | tail -n 20
 ```
 
 
-![](https://github.com/mariesaitou/Bio326/raw/master/docs/assets/Bio326-2023/image11.png){width=80%}
+<details> 
+<summary><strong>INFO Field Descriptions</strong></summary>
 
-Important parameters
+| Field | Description |
+|--------|-------------|
+| `MOSAIC` | Structural variation classified as putative mosaic |
+| `SVLEN` | Length of structural variation |
+| `SVTYPE` | Type of structural variation (INS, DEL, BND, etc.) |
+| `CHR2` | Mate chromosome for BND structural variants |
+| `SUPPORT` | Number of reads supporting the structural variation |
+| `SUPPORT_INLINE` | Reads supporting INS/DEL without split alignments |
+| `SUPPORT_SA` | Reads supporting DEL via supplementary alignments |
+| `SUPPORT_LONG` | Soft-clipped reads supporting long insertions |
+| `END` | End position of the structural variation |
+| `STDEV_POS` | Standard deviation of variant start position |
+| `STDEV_LEN` | Standard deviation of variant length |
+| `COVERAGE` | Coverage at upstream, start, center, end, downstream positions |
+| `STRAND` | Strand orientation of supporting reads |
+| `AC` | Allele count across all samples |
+| `SUPP_VEC` | Per-sample support vector |
+| `CONSENSUS_SUPPORT` | Reads supporting insertion consensus sequence |
+| `RNAMES` | Names of supporting reads (if enabled) |
+| `VAF` | Variant Allele Fraction |
+| `NM` | Mean mismatch rate of supporting reads |
+| `PHASE` | Phasing information derived from supporting reads |
 
-
-1	16849578 : location of the variant 
-
-SVTYPE=DEL;SVLEN=-60 : size and type of the variant
-
-0/1 : genotype 
-
-(you can open a vcf file in notepad, excel etc.)
-
-
-| **field** | **Explanation** |
-|------------|----------------|
-| CHROM | Chromosome name |
-| POS | Variant position |
-| REF | Reference allele (reference version) |
-| ALT | Alternate allele (your sample's version) |
-
-
-Now you have variants! Lets see which genes are affected by the variants.
-
-Since there are many variants it can be difficult to know where to start
-
-Let's select a random variant for yourself to investigate.
+</details>
 
 
 ```{bash,eval=FALSE}
-#Check the number of variant in the file
+# variants
+grep -v '^##' 2025_chr13.vcf | more
 
-NBVAR=$(grep -v '^##' control.vcf | wc -l)
-
-## sample a random number
-
-RANDOMVAR=$(echo $((RANDOM % $NBVAR + 1)))
-
-## let's check the variant sampled
-
-grep -v '^##' control.vcf |  sed -n ${RANDOMVAR}p
 
 ```
 
+<details> 
+<summary><strong>Field Interpretation</strong></summary>
+
+| Field | Meaning |
+|--------|---------|
+| `SVTYPE` | Structural variant type (INS = insertion, DEL = deletion) |
+| `SVLEN` | Variant length (negative values indicate deletions) |
+| `SUPPORT` | Number of reads supporting the variant |
+| `VAF` | Variant allele frequency |
+| `GT` | Genotype (0/1 = heterozygous, 1/1 = homozygous alternate) |
+| `DR` | Reads supporting the reference allele |
+| `DV` | Reads supporting the variant allele |
+
+</details>
 
 
-# Part C. Estimate the effect of variants (Local)
+
+
+Now you have variants! Lets see which genes are affected by the variants... in Part C!
+
+
+
+
+# Part C. Estimate the effect of variants
+
 
 ## Overview
 
@@ -626,9 +695,8 @@ You will:
 - Interpret read-level evidence  
 - Examine gene overlap  
 - Investigate biological function  
-- (Optional) Produce a short structured report  
 
----
+
 
 
 
@@ -663,13 +731,13 @@ Gene annotation
 - `Bos_taurus_chr13.gtf.gz.tbi`  
 
 
----
 
 
-</details> <details> <summary><strong>File Formats Explained (click)</strong></summary>
 
+<details>
+<summary><strong>File Formats Explained (click)</strong></summary>
 
-## File Formats Explained
+File Formats Explained
 
 1) FASTA format (.fa)
 
@@ -689,7 +757,6 @@ Structure:
 
 IGV uses this file as the coordinate system.
 
----
 
 
 2) FASTA index (.fai)
@@ -712,7 +779,6 @@ Purpose:
 - Enables rapid random access
 - Required by IGV
 
----
 
 
 3) BAM format (.bam)
@@ -737,9 +803,6 @@ Core columns:
 | SEQ | Read sequence |
 | QUAL | Base quality |
 
-
-
----
 
 
 4) VCF format (.vcf)
@@ -784,8 +847,6 @@ Important FORMAT fields:
 | DV | Variant read count |
 | GQ | Genotype quality |
 
----
-
 
 5) GTF format (.gtf)
 
@@ -809,8 +870,8 @@ Columns:
 
 Used in IGV to display gene models.
 
-
 </details>
+
 
 
 
@@ -863,14 +924,16 @@ Choose a locus you like and investigate it in IGV.
 
 
 
-## For your report assignment (optional)
+## **For your report assignment**
 
+<div style="background-color: #e6f2ff; padding: 10px; border-radius: 5px;">
 Select one structural variant locus from the table provided and investigate it in IGV.
 Report the genomic coordinates, variant type and size, genotype comparison between the 2024 and 2025 samples, whether the variant overlaps any genes, and briefly discuss the potential functional consequence for the affected gene.
+</div>
 
 ## Example views 
 
-**Example locus**
+**Example locus1**
 
 **Sniffles2.INS.1F6MC — 13:46710350–46710351 — 51 bp insertion — ENSBTAG00000006531 (DIP2C)**
 
@@ -887,35 +950,33 @@ According to the gene annotation track, the variant lies within the ENSBTAG00000
 
 
 
-**Example locus**
+**Example locus2**
 
 **Sniffles2.BND.2F6MC — 13:75795925–75795926 — BND — ENSBTAG00000013114**
 
 ![](images/image_2026_3.png){width=80%}
 
 
-Sniffles2.BND.2F6MC — chr13:75,795,925–75,795,926 — BND — ENSBTAG00000013114
-
 At this locus, compare the two samples directly.
 
 
 In the 2024 sample, read coverage is uniform, mismatches are scattered, and there is no clustering of discordant alignments, indicating absence of a structural rearrangement. 
 
-In 2025, focus on the central region where the reads form a dense, colorful block. The vertical colored lines indicate many mismatches concentrated in the same short interval. Coverage is locally elevated, and multiple reads show discordant alignment in the same position. When many reads change relative to the reference at the exact same coordinates, this is not random sequencing error. 
+In 2025, focus on the central region where the reads form a dense, colorful block. The vertical colored lines indicate many mismatches concentrated in the same short interval. Multiple reads show discordant alignment in the same position. When many reads change relative to the reference at the exact same coordinates, this is not random sequencing error. 
 
 
-This pattern is typical of an inversion or a highly divergent sequence present in 2025 but absent in 2024. The key points to examine are therefore: uniform vs. clustered signal, normal vs. elevated coverage, and isolated mismatches vs. consistent changes across many reads.
+This pattern suggests an inversion or a highly divergent sequence present in 2025 but absent in 2024. 
 
 The locus overlaps ENSBTAG00000013114. A breakend event within a gene may disrupt coding sequence continuity or regulatory structure, depending on whether the breakpoint falls within an exon or intron.
 
 
 
-
 ## Well Done!
 
-🏆That's it ! You are now expert in genome analysis !🏆
+That's it! You are now an expert in genome analysis!
 
-If you're considering undertaking a similar bioinformatics/genomics project for your master's thesis, you can <a href="https://sites.google.com/view/saitou-lab/home">contact our lab</a>
+If you are interested in a similar bioinformatics or genomics project for your master’s thesis, please contact our lab:
+<a href="https://sites.google.com/view/saitou-lab/home">Saitou Lab</a>
 
 
  

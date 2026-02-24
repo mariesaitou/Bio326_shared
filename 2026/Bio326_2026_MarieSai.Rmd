@@ -121,6 +121,24 @@ In the Terminal/Command prompt, go to Sigma2 and your directory there.
 ssh yourID@saga.sigma2.no
 ```
 
+To not get naked in the lobby, create a vritual ```TMUX``` terminal 
+```{bash,eval=FALSE}
+tmux new -s EUK
+```
+and run an interactive job for the class:
+
+```{bash,eval=FALSE}
+srun \
+--account=nn9987k \
+--partition=normal \
+--gres=localscratch:50G \
+--cpus-per-task 4 \
+--nodes 1 \
+--mem=10G \
+--time=02:00:00 \
+--pty bash \
+-i
+```
 
 Let's make a directory for analysis and enter it.
 
@@ -289,16 +307,6 @@ Nanoplot will generate the result files, named "before_filter_A1"xxx. Let's look
 ```{bash,eval=FALSE}
 
 # Taking too long?
-srun \
---account=nn9987k \
---partition=normal \
---gres=localscratch:10G \
---cpus-per-task 4 \
---nodes 1 \
---mem=10G \
---time=02:00:00 \
---pty bash \
--i
 
 cp /cluster/projects/nn9987k/BIO326-2025/day1/before_filter_A1NanoPlot-report.html  before_filter_A1NanoPlot-report.html
 
@@ -605,7 +613,6 @@ Now you got the variant file!
 Copy the vcf in your directory
 
 ```{bash,eval=FALSE}
-qlogin 
 
 cp /cluster/projects/nn9987k/BIO326-2025/day2/2025_chr13.vcf  2025_chr13.vcf 
 

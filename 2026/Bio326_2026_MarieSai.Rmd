@@ -143,6 +143,7 @@ srun \
 Let's make a directory for analysis and enter it.
 
 ```{bash,eval=FALSE}
+cd /cluster/projects/nn9987k/$USER
 mkdir analysis # make directory "analysis"
 cd analysis # set the current directory "analysis"
 
@@ -297,10 +298,14 @@ NanoPlot -t 8  --fastq /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz --pl
 
 ```
 
+Run the script by:
+
+sbatch /cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/Nanoplot.before.euk.SLURM.sh <SAMPLEID>
+
+NB! Remember to use your sample ID for example: NB01
 
 
-
-Nanoplot will generate the result files, named "before_filter_A1"xxx. Let's look into them... 
+Nanoplot will generate the result files, named "before_filter."xxx. Let's look into them... 
 
 
 
@@ -379,8 +384,13 @@ gunzip -c /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz | NanoFilt -q 12 
 ```
 
 
+To run let's do:
 
+```{bash,eval=FALSE}
+sbatch /cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/NanoFilt.euk.SLURM.sh <SAMPLE>
+```
 
+NB! Remember to use your sample ID for example: NB01
 
 
 <details>
@@ -466,9 +476,18 @@ NanoPlot -t 8  --fastq cleaned_A1.fq.gz --plots dot  --no_supplementary --no_sta
 
 ```
 
+To run let's do:
+
+```{bash,eval=FALSE}
+/cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/Nanoplot.cleaned.euk.SLURM.sh <SAMPLE>
+```
+
+NB! Remember to use your sample ID for example: NB01
+
+
 </details> 
 
-Open "after_filter_A1NanoPlot-report.html" **on your local computer.**
+Open "after_filter.$SAMPLENanoPlot-report.html" **on your local computer.**
 
 
 ![](https://github.com/mariesaitou/Bio326_shared/raw/main/2025/images/image6.png){width=80%}

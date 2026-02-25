@@ -300,9 +300,14 @@ NanoPlot -t 8  --fastq /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz --pl
 
 Run the script by:
 
-sbatch /cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/Nanoplot.before.euk.SLURM.sh <SAMPLEID>
 
-NB! Remember to use your sample ID for example: NB01
+```{bash,eval=FALSE}
+sbatch /cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/Nanoplot.before.euk.SLURM.sh <SAMPLE>
+
+```
+
+
+NB! Remember to use your sample ID for example: NB01 in <SAMPLE>
 
 
 Nanoplot will generate the result files, named "before_filter."xxx. Let's look into them... 

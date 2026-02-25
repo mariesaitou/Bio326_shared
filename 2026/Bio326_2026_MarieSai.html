@@ -1762,10 +1762,9 @@ echo &quot;Working with this $CONDA_PREFIX environment ...&quot;
 NanoPlot -t 8  --fastq /cluster/projects/nn9987k/BIO326-2025/day1/1-A.fq.gz --plots dot  --no_supplementary --no_static --N50 -p before_filter_A1
 </code></pre>
 <p>Run the script by:</p>
-<p>sbatch
-/cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/Nanoplot.before.euk.SLURM.sh
-<SAMPLEID></p>
-<p>NB! Remember to use your sample ID for example: NB01</p>
+<pre class="bash"><code>sbatch /cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/Nanoplot.before.euk.SLURM.sh &lt;SAMPLE&gt;
+</code></pre>
+<p>NB! Remember to use your sample ID for example: NB01 in <SAMPLE></p>
 <p>Nanoplot will generate the result files, named “before_filter.”xxx.
 Let’s look into them…</p>
 <pre class="bash"><code>

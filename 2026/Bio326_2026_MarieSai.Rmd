@@ -567,42 +567,114 @@ To understand the core logic of read mapping and structural variant calling by r
 
 ```{bash,eval=FALSE}
 #!/bin/bash
-#SBATCH --job-name=Sniffles # sensible name for the job
+#SBATCH --job-name=Sniffles 🐽
 #SBATCH --mem=12G 
 #SBATCH --ntasks=1   
 #SBATCH --cpus-per-task=8
-#SBATCH --output=mapping 
+#SBATCH --output=sniffles_%j.out
 #SBATCH --account=nn9987k
 #SBATCH --time=20:00  
 
-##Activate conda environment
+########################################
+# 🧬 Usage check
+########################################
+
+if [ -z "$1" ]; then
+    echo "❌ ERROR: You must provide an OUTPUT DIRECTORY!"
+    echo "👉 Usage: sbatch sniffles.sh /path/to/output_directory"
+    exit 1
+fi
+
+OUTDIR=$1
+
+echo "📂 Output directory: $OUTDIR"
+
+# Create directory if it doesn't exist
+mkdir -p "$OUTDIR"
+
+########################################
+# 🐍 Activate conda environment
+########################################
+
 module load StdEnv
 module load Miniconda3/23.10.0-1
 source ${EBROOTMINICONDA3}/bin/activate 
-
-echo "Working with this $CONDA_PREFIX environment ..."
-
 conda activate /cluster/projects/nn9987k/.share/conda_environments/EUK_DRY
 
-minimap2 -t 8 -ax map-ont /cluster/projects/nn9987k/BIO326-2025/day2/Bos_taurus_chr13.fa  /cluster/projects/nn9987k/BIO326-2025/day2/2025_chr13_teaching_20kb.fastq.gz > 2025_chr13.sam
+echo "🐍 Using conda environment: $CONDA_PREFIX"
+echo "🖥️  CPUs: $SLURM_CPUS_PER_TASK"
+echo "--------------------------------------"
 
+########################################
+# 🧭 Define input files (you can later make these arguments too)
+########################################
 
-# convert the sam file to bam format
-samtools view -S -b 2025_chr13.sam > 2025_chr13_temp.bam
+REF=/cluster/projects/nn9987k/BIO326-2025/day2/Bos_taurus_chr13.fa
+READS=/cluster/projects/nn9987k/BIO326-2025/day2/2025_chr13_teaching_20kb.fastq.gz
 
-## sort the bam file
-samtools sort 2025_chr13_temp.bam -o 2025_chr13.bam
+PREFIX=2025_chr13
 
-# index the bam file
-samtools index -M  2025_chr13.bam
+########################################
+# 🧬 Mapping
+########################################
 
-# Variant Calling using Sniffles
-sniffles --input  2025_chr13.bam --vcf 2025_chr13.vcf
+echo "🧬 Mapping with minimap2..."
+
+minimap2 -t $SLURM_CPUS_PER_TASK -ax map-ont \
+"$REF" "$READS" \
+> ${OUTDIR}/${PREFIX}.sam
+
+echo "✅ Mapping done"
+
+########################################
+# 🔄 SAM ➜ BAM
+########################################
+
+echo "🔄 Converting to BAM..."
+samtools view -@ $SLURM_CPUS_PER_TASK -S -b \
+${OUTDIR}/${PREFIX}.sam > ${OUTDIR}/${PREFIX}_temp.bam
+
+echo "📊 Sorting BAM..."
+samtools sort -@ $SLURM_CPUS_PER_TASK \
+${OUTDIR}/${PREFIX}_temp.bam \
+-o ${OUTDIR}/${PREFIX}.bam
+
+echo "📌 Indexing BAM..."
+samtools index ${OUTDIR}/${PREFIX}.bam
+
+########################################
+# 🧪 Variant Calling
+########################################
+
+echo "🧬 Calling structural variants with Sniffles..."
+
+sniffles \
+  --input ${OUTDIR}/${PREFIX}.bam \
+  --vcf ${OUTDIR}/${PREFIX}.vcf \
+  --threads $SLURM_CPUS_PER_TASK
+
+echo "🎉 Variant calling finished!"
+echo "📄 VCF file: ${OUTDIR}/${PREFIX}.vcf"
+
+########################################
+# 🧹 Cleanup
+########################################
+
+echo "🧹 Cleaning temporary files..."
+rm -f ${OUTDIR}/${PREFIX}.sam
+rm -f ${OUTDIR}/${PREFIX}_temp.bam
+
+echo "✨ Pipeline completed successfully!"
 
 
 ```
 
+Run:
 
+```bash
+cd /cluster/projects/nn9987k/$USER && mkdir sniffles && cd sniffles && sbatch /cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/sniffles.SLURM.sh /cluster/projects/nn9987k/$USER/sniffles
+
+```
 
 <details> 
 <summary><strong>What each step is doing (click)</strong></summary>

@@ -484,7 +484,7 @@ NanoPlot -t 8  --fastq cleaned_A1.fq.gz --plots dot  --no_supplementary --no_sta
 To run let's do:
 
 ```{bash,eval=FALSE}
-/cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/Nanoplot.cleaned.euk.SLURM.sh <SAMPLE>
+sbatch /cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/Nanoplot.cleaned.euk.SLURM.sh <SAMPLE>
 ```
 
 NB! Remember to use your sample ID for example: NB01
@@ -562,7 +562,7 @@ To understand the core logic of read mapping and structural variant calling by r
 
 
 
-## Run Minimap and map the reads to the reference genome
+## (Optional) Run Minimap and map the reads to the reference genome
 
 
 ```{bash,eval=FALSE}
@@ -626,19 +626,17 @@ Workflow Overview
 - Important for studying mutations and genetic variation.  
 [bam and sam format](https://labs.epi2me.io/reviewing-bam/)
 
-Note: Mapping and variant calling is time consuming, but you can find the output file here: /cluster/projects/nn9987k/BIO326-2025/day2/2025_chr13.vcf
 
 
 Now you got the variant file!
 
 ## Investigate the variants
 
-
-Copy the vcf in your directory
+If it takes time... copy the vcf in your directory
 
 ```{bash,eval=FALSE}
 
-cp /cluster/projects/nn9987k/BIO326-2025/day2/2025_chr13.vcf  2025_chr13.vcf 
+cp /cluster/projects/nn9987k/BIO326-2025/data_euk_2026/2025_chr13.vcf  2025_chr13.vcf 
 
 
 ```

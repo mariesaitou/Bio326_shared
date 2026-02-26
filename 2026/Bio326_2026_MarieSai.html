@@ -1895,7 +1895,7 @@ echo &quot;Working with this $CONDA_PREFIX environment ...&quot;
 NanoPlot -t 8  --fastq cleaned_A1.fq.gz --plots dot  --no_supplementary --no_static --N50 -p after_filter_A1
 </code></pre>
 <p>To run let’s do:</p>
-<pre class="bash"><code>/cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/Nanoplot.cleaned.euk.SLURM.sh &lt;SAMPLE&gt;</code></pre>
+<pre class="bash"><code>sbatch /cluster/projects/nn9987k/BIO326-2025/scripts_euk_2026/Nanoplot.cleaned.euk.SLURM.sh &lt;SAMPLE&gt;</code></pre>
 <p>NB! Remember to use your sample ID for example: NB01</p>
 </details>
 <p>Open “after_filter.$SAMPLENanoPlot-report.html” <strong>on your local
@@ -1966,9 +1966,9 @@ different from your sample and standard sample.</li>
 </ul>
 </div>
 </div>
-<div id="run-minimap-and-map-the-reads-to-the-reference-genome" class="section level2" number="3.2">
-<h2><span class="header-section-number">3.2</span> Run Minimap and map
-the reads to the reference genome</h2>
+<div id="optional-run-minimap-and-map-the-reads-to-the-reference-genome" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> (Optional) Run
+Minimap and map the reads to the reference genome</h2>
 <pre class="bash"><code>#!/bin/bash
 #SBATCH --job-name=Sniffles # sensible name for the job
 #SBATCH --mem=12G 
@@ -2053,18 +2053,15 @@ genome.<br />
 <a href="https://labs.epi2me.io/reviewing-bam/">bam and sam
 format</a></li>
 </ul>
-<p>Note: Mapping and variant calling is time consuming, but you can find
-the output file here:
-/cluster/projects/nn9987k/BIO326-2025/day2/2025_chr13.vcf</p>
 <p>Now you got the variant file!</p>
 </div>
 </div>
 <div id="investigate-the-variants" class="section level2" number="3.3">
 <h2><span class="header-section-number">3.3</span> Investigate the
 variants</h2>
-<p>Copy the vcf in your directory</p>
+<p>If it takes time… copy the vcf in your directory</p>
 <pre class="bash"><code>
-cp /cluster/projects/nn9987k/BIO326-2025/day2/2025_chr13.vcf  2025_chr13.vcf 
+cp /cluster/projects/nn9987k/BIO326-2025/data_euk_2026/2025_chr13.vcf  2025_chr13.vcf 
 </code></pre>
 <p>Look inside the vcf</p>
 <pre class="bash"><code># INFO field

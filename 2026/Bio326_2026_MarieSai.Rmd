@@ -1090,9 +1090,9 @@ If you are interested in a similar bioinformatics or genomics project for your m
 
 **(1) “Shouldn’t we map each dataset separately?”**
 
-In principle, we could. However, each dataset corresponds to roughly one twentieth of a MinION flow cell. A typical MinION flow cell produces on the order of 10–20 Gb of data. Dividing that by 20 gives approximately 0.5–1 Gb per subset.
+In principle, we could. However, each dataset corresponds to roughly one twentieth of a PromethIONN flow cell. A typical PromethIONN flow cell produces on the order of -40 Gb of data. Dividing that by 20 gives approximately -2 Gb per subset.
 
-For a mammalian genome of ~3 Gb, this corresponds to only ~0.2–0.3× coverage. In practical terms, this means that only small, scattered portions of the genome are sequenced, while most of the genome is not covered at all. With such sparse coverage, it is generally not possible to make reliable biological inferences. So mapping each subset separately is technically possible if you are curious to see, but the coverage is too low to draw meaningful conclusions.
+For a mammalian genome of ~3 Gb, this corresponds to only ~0.8× coverage. In practical terms, this means that only small, scattered portions of the genome are sequenced, while most of the genome is not covered at all. With such sparse coverage, it is generally not possible to make reliable biological inferences. So mapping each subset separately is technically possible if you are curious to see, but the coverage is too low to draw meaningful conclusions.
 
 
 **(2) “Why are we using last year’s data?”**
@@ -1101,7 +1101,7 @@ To perform proper variant calling, we would need to combine all ~20 subsets and 
 
 **(3) “Can we perform de novo assembly instead?”**
 
-For a mammalian genome of ~3 Gb, assembly requires much higher coverage. Long-read assembly typically benefits from tens of times coverage, for example, on the order of –50× depending on the goals (around 10 flowcells).
+For a mammalian genome of ~3 Gb, assembly requires much higher coverage. Long-read assembly typically benefits from tens of times coverage, for example, on the order of –50× depending on the goals (around 5 flowcells).
 
 Using data from a single flow cell, some regions of the genome are not sequenced at all, or some regions are covered by only a single read. Assembly algorithms rely on overlapping reads to connect sequences into longer contiguous segments.
 When there are too few overlaps, reads cannot be reliably linked together, and large gaps remain. There is not enough information to reconstruct long stretches of the genome.

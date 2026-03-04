@@ -1090,7 +1090,7 @@ If you are interested in a similar bioinformatics or genomics project for your m
 
 **(1) “Shouldn’t we map each dataset separately?”**
 
-In principle, we could. However, each dataset corresponds to roughly one twentieth of a PromethIONN flow cell. A typical PromethIONN flow cell produces on the order of -40 Gb of data. Dividing that by 20 gives approximately -2 Gb per subset.
+In principle, we could. However, each dataset corresponds to roughly one twentieth of a PromethION flow cell. A typical PromethION flow cell produces on the order of -40 Gb of data. Dividing that by 20 gives approximately -2 Gb per subset.
 
 For a mammalian genome of ~3 Gb, this corresponds to only ~0.8× coverage. In practical terms, this means that only small, scattered portions of the genome are sequenced, while most of the genome is not covered at all. With such sparse coverage, it is generally not possible to make reliable biological inferences. So mapping each subset separately is technically possible if you are curious to see, but the coverage is too low to draw meaningful conclusions.
 
